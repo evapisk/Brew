@@ -13,7 +13,7 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     if (!email.endsWith(".edu")) { setError("A .edu email address is required."); return; }
@@ -38,69 +38,56 @@ export default function SignUpPage() {
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
-      {/* Header */}
-      <div className="bg-brew-walnut px-6 pt-10 pb-5">
-        <Link href="/" className="text-white/50 text-xs mb-3 block">← Back</Link>
-        <h1 className="text-3xl font-rova text-white">brew</h1>
-        <p className="mt-1 text-xs font-lora text-white/50">find your next coffee chat</p>
+      <div className="brew-header px-6 pt-10 pb-6">
+        <Link href="/" className="text-white/40 text-xs mb-4 block font-medium tracking-wide hover:text-white/70 transition-colors">
+          ← Back
+        </Link>
+        <h1 className="text-3xl font-rova text-white animate-fade-in" style={{ letterSpacing: "-0.01em" }}>brew</h1>
+        <p className="mt-1 text-xs font-lora text-white/50 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          find your next coffee chat
+        </p>
       </div>
 
-      {/* Form */}
-      <div className="flex-1 px-6 pt-8 pb-10">
-        <h2 className="text-2xl font-bold text-brew-walnut">Create account.</h2>
+      <div className="flex-1 px-6 pt-8 pb-10 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+        <h2 className="text-2xl font-bold text-brew-walnut" style={{ letterSpacing: "-0.02em" }}>Create account.</h2>
         <p className="mt-1 text-sm font-lora text-brew-midbrown">Requires a .edu email address.</p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
             <p className="section-label">NAME</p>
-            <input
-              type="text"
-              required
-              value={name}
+            <input type="text" required value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              className="brew-input"
-            />
+              placeholder="Your name" className="brew-input" />
           </div>
-
           <div>
             <p className="section-label">.EDU EMAIL</p>
-            <input
-              type="email"
-              required
-              value={email}
+            <input type="email" required value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="alex@university.edu"
-              className="brew-input"
-            />
+              placeholder="alex@university.edu" className="brew-input" />
           </div>
-
           <div>
             <p className="section-label">PASSWORD</p>
-            <input
-              type="password"
-              required
-              minLength={8}
-              value={password}
+            <input type="password" required minLength={8} value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 8 characters"
-              className="brew-input"
-            />
+              placeholder="Min. 8 characters" className="brew-input" />
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">{error}</p>
+            <div
+              className="rounded-xl px-4 py-3 text-sm text-red-600 animate-scale-in"
+              style={{ background: "rgba(220,60,60,0.06)", border: "1px solid rgba(220,60,60,0.15)" }}
+            >
+              {error}
+            </div>
           )}
 
-          <div className="pt-2">
-            <button type="submit" disabled={loading} className="btn-primary">
+          <div className="pt-1">
+            <button type="submit" disabled={loading} className="btn-pill">
               {loading ? "Creating account…" : "Continue"}
             </button>
           </div>
@@ -108,7 +95,7 @@ export default function SignUpPage() {
 
         <p className="mt-6 text-center text-sm text-brew-khaki">
           Already have an account?{" "}
-          <Link href="/auth/signin" className="font-semibold text-brew-walnut underline-offset-2 hover:underline">
+          <Link href="/auth/signin" className="font-bold text-brew-walnut hover:underline underline-offset-2">
             Sign in
           </Link>
         </p>

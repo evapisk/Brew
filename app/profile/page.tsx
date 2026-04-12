@@ -3,28 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
-import { LogOut, Check } from "lucide-react";
-
-const YEAR_LABELS: Record<number, string> = {
-  1: "Freshman", 2: "Sophomore", 3: "Junior",
-  4: "Senior", 5: "Master's", 6: "PhD",
-};
-
-interface ProfileData {
-  name: string;
-  email: string;
-  major: string;
-  university: string;
-  year: number;
-  goals: string[];
-  skills_offer: string[];
-  skills_want: string[];
-}
-=======
 import { LogOut, Check, X, Plus } from "lucide-react";
 import { GOAL_TAGS, SKILL_TAGS } from "@/lib/tags";
->>>>>>> c740b2f (ai resume extraction)
 
 const ALL_GOALS = Object.values(GOAL_TAGS).flat() as string[];
 const ALL_SKILLS = Object.values(SKILL_TAGS).flat() as string[];
@@ -40,16 +20,11 @@ interface Categories {
   skills_want: string[];
 }
 
-// ── Editable tag section (reused from onboarding) ─────────────────────────────
 function TagSection({
   label, sublabel, tags, all, color, onChange,
 }: {
-  label: string;
-  sublabel: string;
-  tags: string[];
-  all: string[];
-  color: string;
-  onChange: (next: string[]) => void;
+  label: string; sublabel: string; tags: string[];
+  all: string[]; color: string; onChange: (next: string[]) => void;
 }) {
   const [open, setOpen] = useState(false);
   const remaining = all.filter((t) => !tags.includes(t));
@@ -66,7 +41,6 @@ function TagSection({
         <p className="section-label">{label}</p>
         <p className="text-xs text-brew-khaki mt-0.5">{sublabel}</p>
       </div>
-
       <div className="flex flex-wrap gap-2 min-h-[2rem]">
         {tags.length === 0 && (
           <p className="text-xs text-brew-khaki italic">None — tap + to add</p>
@@ -77,11 +51,7 @@ function TagSection({
             className={`flex items-center gap-1.5 rounded-full ${color} text-white px-3 py-1 text-xs font-medium`}
           >
             {tag}
-            <button
-              onClick={() => remove(tag)}
-              className="opacity-70 hover:opacity-100 transition"
-              aria-label={`Remove ${tag}`}
-            >
+            <button onClick={() => remove(tag)} className="opacity-70 hover:opacity-100 transition" aria-label={`Remove ${tag}`}>
               <X size={11} />
             </button>
           </span>
@@ -95,15 +65,10 @@ function TagSection({
           </button>
         )}
       </div>
-
       {open && remaining.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-2 border-t border-[#EAE6DF]">
           {remaining.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => add(tag)}
-              className="tag-pill tag-pill-inactive text-xs"
-            >
+            <button key={tag} onClick={() => add(tag)} className="tag-pill tag-pill-inactive text-xs">
               {tag}
             </button>
           ))}
@@ -113,146 +78,76 @@ function TagSection({
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const router = useRouter();
-<<<<<<< HEAD
-  const [profile, setProfile] = useState<ProfileData>({
-    name: "", email: "", major: "", university: "", year: 1,
-    goals: [], skills_offer: [], skills_want: [],
-  });
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [university, setUniversity] = useState("");
+  const [year, setYear] = useState(1);
+  const [industry, setIndustry] = useState("");
+  const [categories, setCategories] = useState<Categories>({ goals: [], skills_offer: [], skills_want: [] });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState("");
-=======
-  const [email, setEmail] = useState<string | null>(null);
-  const [name, setName] = useState<string | null>(null);
-  const [university, setUniversity] = useState<string | null>(null);
-  const [year, setYear] = useState<number | null>(null);
-  const [categories, setCategories] = useState<Categories>({
-    goals: [], skills_offer: [], skills_want: [],
-  });
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
->>>>>>> c740b2f (ai resume extraction)
+  const [error, setError] = useState("");
 
-  // Load profile on mount
   useEffect(() => {
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
-<<<<<<< HEAD
-
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push("/auth/signin"); return; }
-
+      setEmail(user.email ?? "");
       const { data } = await supabase
         .from("users")
-        .select("name, major, university, year, goals, skills_offer, skills_want")
+        .select("name, university, year, industry, goals, skills_offer, skills_want")
         .eq("auth_id", user.id)
         .single();
-
-      setProfile({
-        name: data?.name ?? "",
-        email: user.email ?? "",
-        major: data?.major ?? "",
-        university: data?.university ?? "",
-        year: data?.year ?? 1,
-        goals: data?.goals ?? [],
-        skills_offer: data?.skills_offer ?? [],
-        skills_want: data?.skills_want ?? [],
-      });
+      if (data) {
+        setName(data.name ?? "");
+        setUniversity(data.university ?? "");
+        setYear(data.year ?? 1);
+        setIndustry(data.industry ?? "");
+        setCategories({
+          goals: data.goals ?? [],
+          skills_offer: data.skills_offer ?? [],
+          skills_want: data.skills_want ?? [],
+        });
+      }
       setLoading(false);
     });
   }, [router]);
 
-  function set(field: keyof ProfileData, value: string | number) {
-    setProfile((p) => ({ ...p, [field]: value }));
+  const updateCategory = useCallback((field: keyof Categories, next: string[]) => {
+    setCategories((c) => ({ ...c, [field]: next }));
+    setDirty(true);
     setSaved(false);
-  }
+  }, []);
 
   async function handleSave() {
-    setSaving(true);
-    setError("");
+    setSaving(true); setError("");
     try {
       const res = await fetch("/api/onboard/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: profile.name,
-          major: profile.major,
-          university: profile.university,
-          year: profile.year,
-          goals: profile.goals,
-          skills_offer: profile.skills_offer,
-          skills_want: profile.skills_want,
-          organizations: [],
-          favorite_cafes: [],
+          name, university, year, industry,
+          goals: categories.goals,
+          skills_offer: categories.skills_offer,
+          skills_want: categories.skills_want,
+          organizations: [], favorite_cafes: [],
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Save failed");
+      setDirty(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Could not save");
-    } finally {
-      setSaving(false);
-    }
-  }
-=======
-    supabase.auth.getUser().then(async ({ data: authData }) => {
-      if (!authData.user) return;
-      setEmail(authData.user.email ?? null);
-
-      const { data: profile } = await (supabase
-        .from("users")
-        .select("name, university, year, goals, skills_offer, skills_want")
-        .eq("auth_id", authData.user.id)
-        .single() as any);
-
-      if (profile) {
-        setName(profile.name ?? null);
-        setUniversity(profile.university ?? null);
-        setYear(profile.year ?? null);
-        setCategories({
-          goals: profile.goals ?? [],
-          skills_offer: profile.skills_offer ?? [],
-          skills_want: profile.skills_want ?? [],
-        });
-      }
-    });
-  }, []);
->>>>>>> c740b2f (ai resume extraction)
-
-  // Track changes
-  const updateCategory = useCallback(
-    (field: keyof Categories, next: string[]) => {
-      setCategories((c) => ({ ...c, [field]: next }));
-      setDirty(true);
-      setSaved(false);
-    },
-    []
-  );
-
-  async function handleSaveCategories() {
-    setSaving(true);
-    try {
-      const res = await fetch("/api/users/categories", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(categories),
-      });
-      if (!res.ok) throw new Error("Save failed");
-      setDirty(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   }
 
   async function handleSignOut() {
@@ -264,189 +159,142 @@ export default function ProfilePage() {
     router.push("/");
   }
 
+  const avatarLetters = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "?";
+
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
-<<<<<<< HEAD
-      {/* ── Header ── */}
-      <div className="bg-brew-walnut px-6 pt-10 pb-5 shrink-0">
-        <h1 className="text-3xl font-rova text-white">profile</h1>
-        <p className="text-xs font-lora text-white/50 mt-0.5">your account</p>
+      {/* Header */}
+      <div className="brew-header px-6 pt-10 pb-5 shrink-0">
+        <h1 className="text-3xl font-rova text-white animate-fade-in" style={{ letterSpacing: "-0.01em" }}>profile</h1>
+        <p className="text-xs font-lora text-white/50 mt-0.5 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          your account
+        </p>
       </div>
 
       {loading ? (
-        <div className="flex flex-1 items-center justify-center">
-          <p className="text-sm text-brew-khaki animate-pulse">Loading…</p>
-=======
-      {/* Header */}
-      <div className="bg-brew-walnut px-6 pt-14 pb-6 shrink-0">
-        <h1 className="text-xl font-bold text-white">brew</h1>
-        <p className="text-xs text-white/50 mt-0.5">your profile</p>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-6 pt-6 pb-28 space-y-5">
-
-        {/* Account info */}
-        <div className="rounded-xl bg-white card-shadow px-5 py-4 space-y-1">
-          <p className="section-label">ACCOUNT</p>
-          <p className="text-sm font-semibold text-brew-walnut">{name ?? email ?? "Loading…"}</p>
-          {university && year && (
-            <p className="text-xs text-brew-khaki">
-              {YEAR_LABELS[year]} · {university}
-            </p>
-          )}
-          {!university && (
-            <p className="text-xs text-brew-khaki">{email ?? ""}</p>
-          )}
-        </div>
-
-        {/* Categories card */}
-        <div className="rounded-xl bg-white card-shadow px-5 py-5 space-y-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-brew-walnut">Your categories</p>
-            {dirty && (
-              <button
-                onClick={handleSaveCategories}
-                disabled={saving}
-                className="flex items-center gap-1.5 rounded-full bg-brew-walnut text-white text-xs font-semibold px-3 py-1.5 hover:bg-brew-body transition disabled:opacity-50"
-              >
-                {saving ? "Saving…" : saved ? <><Check size={11} /> Saved</> : "Save changes"}
-              </button>
-            )}
-            {saved && !dirty && (
-              <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
-                <Check size={12} /> Saved
-              </span>
-            )}
-          </div>
-
-          <TagSection
-            label="SKILLS YOU OFFER"
-            sublabel="What you can teach — drives who gets matched to you"
-            tags={categories.skills_offer}
-            all={ALL_SKILLS}
-            color="bg-brew-walnut"
-            onChange={(next) => updateCategory("skills_offer", next)}
-          />
-
-          <div className="border-t border-[#EAE6DF]" />
-
-          <TagSection
-            label="YOUR GOALS"
-            sublabel="What you're working toward — used to find aligned matches"
-            tags={categories.goals}
-            all={ALL_GOALS}
-            color="bg-brew-accent"
-            onChange={(next) => updateCategory("goals", next)}
-          />
-
-          <div className="border-t border-[#EAE6DF]" />
-
-          <TagSection
-            label="SKILLS YOU WANT TO LEARN"
-            sublabel="What you want from a match — used to find complementary skills"
-            tags={categories.skills_want}
-            all={ALL_SKILLS}
-            color="bg-[#4A6B9B]"
-            onChange={(next) => updateCategory("skills_want", next)}
-          />
->>>>>>> c740b2f (ai resume extraction)
+        <div className="flex-1 px-6 pt-6 space-y-4 animate-fade-in">
+          <div className="h-20 skeleton rounded-2xl" />
+          {[1,2,3,4].map((i) => <div key={i} className="h-14 skeleton rounded-xl" style={{ animationDelay: `${i*0.08}s` }} />)}
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto px-6 pt-6 pb-36 space-y-5">
+          <div className="flex-1 overflow-y-auto scroll-smooth-ios px-6 pt-6 pb-36 space-y-5">
 
-            {/* Avatar / name row */}
-            <div className="flex items-center gap-4 rounded-xl bg-white card-shadow px-5 py-4">
-              <div className="w-14 h-14 rounded-full bg-brew-walnut flex items-center justify-center shrink-0">
-                <span className="text-lg font-bold text-white">
-                  {profile.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "?"}
-                </span>
+            {/* Avatar card */}
+            <div
+              className="flex items-center gap-4 rounded-2xl px-5 py-4 animate-fade-in-up"
+              style={{ background: "#fff", boxShadow: "0 1px 3px rgba(61,31,13,0.05), 0 6px 20px rgba(61,31,13,0.09)" }}
+            >
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center shrink-0 text-lg font-bold text-white"
+                style={{ background: "linear-gradient(135deg, #4A2C17, #3D1F0D)", boxShadow: "0 3px 12px rgba(61,31,13,0.28)" }}
+              >
+                {avatarLetters}
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-brew-walnut truncate">{profile.name || "Your name"}</p>
-                <p className="text-xs text-brew-khaki truncate">{profile.email}</p>
+                <p className="font-bold text-brew-walnut truncate" style={{ letterSpacing: "-0.01em" }}>
+                  {name || "Your name"}
+                </p>
+                <p className="text-xs text-brew-khaki truncate mt-0.5">{email}</p>
               </div>
             </div>
 
-            {/* Name */}
-            <div>
-              <p className="section-label">NAME</p>
-              <input
-                type="text"
-                value={profile.name}
-                onChange={(e) => set("name", e.target.value)}
-                placeholder="Your full name"
-                className="brew-input"
+            {/* Basic fields */}
+            <div
+              className="rounded-2xl px-5 py-5 space-y-4 animate-fade-in-up"
+              style={{ background: "#fff", boxShadow: "0 1px 3px rgba(61,31,13,0.05), 0 6px 20px rgba(61,31,13,0.09)", animationDelay: "0.08s" }}
+            >
+              <div>
+                <p className="section-label">NAME</p>
+                <input type="text" value={name} onChange={(e) => { setName(e.target.value); setDirty(true); setSaved(false); }}
+                  placeholder="Your full name" className="brew-input" />
+              </div>
+              <div>
+                <p className="section-label">INDUSTRY</p>
+                <input type="text" value={industry} onChange={(e) => { setIndustry(e.target.value); setDirty(true); setSaved(false); }}
+                  placeholder="e.g. Tech, Finance, Healthcare…" className="brew-input" />
+              </div>
+              <div>
+                <p className="section-label">YEAR</p>
+                <select value={year} onChange={(e) => { setYear(Number(e.target.value)); setDirty(true); setSaved(false); }} className="brew-input">
+                  {[1,2,3,4,5,6].map((y) => <option key={y} value={y}>{YEAR_LABELS[y]}</option>)}
+                </select>
+              </div>
+              <div>
+                <p className="section-label">COLLEGE</p>
+                <input type="text" value={university} onChange={(e) => { setUniversity(e.target.value); setDirty(true); setSaved(false); }}
+                  placeholder="e.g. NYU, UCLA, MIT…" className="brew-input" />
+              </div>
+            </div>
+
+            {/* Tag sections */}
+            <div
+              className="rounded-2xl px-5 py-5 space-y-6 animate-fade-in-up"
+              style={{ background: "#fff", boxShadow: "0 1px 3px rgba(61,31,13,0.05), 0 6px 20px rgba(61,31,13,0.09)", animationDelay: "0.12s" }}
+            >
+              <TagSection
+                label="SKILLS YOU OFFER"
+                sublabel="What you can teach — drives who gets matched to you"
+                tags={categories.skills_offer}
+                all={ALL_SKILLS}
+                color="bg-brew-walnut"
+                onChange={(next) => updateCategory("skills_offer", next)}
               />
-            </div>
-
-            {/* Major */}
-            <div>
-              <p className="section-label">MAJOR</p>
-              <input
-                type="text"
-                value={profile.major}
-                onChange={(e) => set("major", e.target.value)}
-                placeholder="e.g. Computer Science"
-                className="brew-input"
+              <div className="border-t border-[#EAE6DF]" />
+              <TagSection
+                label="YOUR GOALS"
+                sublabel="What you're working toward"
+                tags={categories.goals}
+                all={ALL_GOALS}
+                color="bg-brew-accent"
+                onChange={(next) => updateCategory("goals", next)}
               />
-            </div>
-
-            {/* Year */}
-            <div>
-              <p className="section-label">YEAR</p>
-              <select
-                value={profile.year}
-                onChange={(e) => set("year", Number(e.target.value))}
-                className="brew-input"
-              >
-                {[1, 2, 3, 4, 5, 6].map((y) => (
-                  <option key={y} value={y}>{YEAR_LABELS[y]}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* University */}
-            <div>
-              <p className="section-label">COLLEGE</p>
-              <input
-                type="text"
-                value={profile.university}
-                onChange={(e) => set("university", e.target.value)}
-                placeholder="e.g. NYU, UCLA, MIT…"
-                className="brew-input"
+              <div className="border-t border-[#EAE6DF]" />
+              <TagSection
+                label="SKILLS YOU WANT TO LEARN"
+                sublabel="What you want from a match"
+                tags={categories.skills_want}
+                all={ALL_SKILLS}
+                color="bg-[#4A6B9B]"
+                onChange={(next) => updateCategory("skills_want", next)}
               />
             </div>
 
             {error && (
-              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
+              <div className="rounded-xl px-4 py-3 text-sm text-red-600 animate-scale-in"
+                style={{ background: "rgba(220,60,60,0.06)", border: "1px solid rgba(220,60,60,0.15)" }}>
+                {error}
+              </div>
             )}
 
             {/* Sign out */}
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-5 py-3 text-sm font-medium text-red-600 hover:bg-red-100 transition w-full justify-center"
+              className="flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold w-full transition-all active:scale-[0.98] animate-fade-in-up"
+              style={{ animationDelay: "0.2s", background: "rgba(220,60,60,0.06)", color: "#C0383A", border: "1px solid rgba(220,60,60,0.15)" }}
             >
               <LogOut size={15} />
               Sign out
             </button>
           </div>
 
-          {/* ── Sticky save ── */}
-          <div className="sticky bottom-0 bg-brew-offwhite border-t border-[#D4CFC6] px-6 py-5 shrink-0">
+          {/* Sticky save */}
+          <div
+            className="sticky bottom-0 px-6 py-5 shrink-0"
+            style={{ background: "rgba(232,228,220,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: "1px solid rgba(212,207,198,0.5)" }}
+          >
             <button
               onClick={handleSave}
-              disabled={saving}
-              className="w-full rounded-full py-4 text-base font-semibold transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-              style={{ background: saved ? "#4A7C4E" : "var(--brew-walnut)", color: "#fff" }}
+              disabled={saving || (!dirty && !saved)}
+              className="w-full rounded-full py-4 text-base font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
+              style={{
+                background: saved ? "linear-gradient(135deg, #2E6B3A, #3A8A4A)" : "linear-gradient(135deg, #4A2C17, #3D1F0D)",
+                color: "#fff",
+                boxShadow: saved ? "0 4px 16px rgba(46,107,58,0.32)" : "0 4px 16px rgba(61,31,13,0.28)",
+                transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
+              }}
             >
-              {saved ? (
-                <><Check size={18} /> Saved</>
-              ) : saving ? (
-                "Saving…"
-              ) : (
-                "Save changes"
-              )}
+              {saved ? <><Check size={18} /> Saved</> : saving ? "Saving…" : "Save changes"}
             </button>
           </div>
         </>

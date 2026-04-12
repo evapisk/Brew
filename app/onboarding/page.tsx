@@ -233,7 +233,7 @@ export default function OnboardingPage() {
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
       {/* ── Header ── */}
-      <div className="bg-brew-walnut px-6 pt-10 pb-5 shrink-0">
+      <div className="brew-header px-6 pt-10 pb-5 shrink-0">
         <h1 className="text-3xl font-rova text-white">brew</h1>
         <p className="mt-1 text-sm font-lora text-white/60">let&apos;s set up your profile</p>
       </div>
@@ -357,7 +357,7 @@ export default function OnboardingPage() {
         <button
           onClick={handleSubmit}
           disabled={loading || !profile.name || !profile.university}
-          className="w-full rounded-full bg-brew-walnut py-4 text-white font-semibold text-base hover:bg-brew-body active:scale-[0.98] transition disabled:opacity-50"
+          className="btn-pill"
         >
           {loading ? "Setting up your profile…" : "Find my matches ☕"}
         </button>

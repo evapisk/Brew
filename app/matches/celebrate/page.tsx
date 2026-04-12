@@ -14,15 +14,22 @@ function CelebrateContent() {
   const matchId = params.get("matchId") ?? "";
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-brew-walnut px-6 py-12 text-center">
+    <main
+      className="flex min-h-screen flex-col items-center justify-center px-6 py-12 text-center"
+      style={{
+        background: "radial-gradient(ellipse at 30% 20%, #5C2E0E 0%, #3D1F0D 45%, #1E0A04 100%)",
+      }}
+    >
       {/* Overlapping avatar circles */}
       <div className="relative flex items-center justify-center mb-8 h-24 w-36">
         {/* Me */}
-        <div className="absolute left-0 w-20 h-20 rounded-full bg-[#C4A882] border-4 border-brew-walnut flex items-center justify-center z-10">
-          <span className="text-xl font-bold text-brew-walnut">ME</span>
+        <div className="absolute left-0 w-20 h-20 rounded-full border-4 flex items-center justify-center z-10"
+          style={{ background: "linear-gradient(135deg,#C4A882,#9B7350)", borderColor: "rgba(255,255,255,0.15)", boxShadow: "0 4px 20px rgba(0,0,0,0.35)" }}>
+          <span className="text-xl font-bold text-white" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>ME</span>
         </div>
         {/* Match */}
-        <div className="absolute right-0 w-20 h-20 rounded-full bg-white/20 border-4 border-brew-walnut flex items-center justify-center z-10">
+        <div className="absolute right-0 w-20 h-20 rounded-full border-4 flex items-center justify-center z-10"
+          style={{ background: "linear-gradient(135deg,rgba(255,255,255,0.20),rgba(255,255,255,0.08))", borderColor: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", boxShadow: "0 4px 20px rgba(0,0,0,0.35)" }}>
           <span className="text-xl font-bold text-white">{initials(name)}</span>
         </div>
         {/* Coffee cup overlap hint */}
@@ -42,7 +49,8 @@ function CelebrateContent() {
       <div className="mt-10 w-full max-w-xs space-y-3">
         <button
           onClick={() => router.push(matchId ? `/messages/${matchId}` : "/messages")}
-          className="w-full rounded-full bg-white py-4 text-base font-semibold text-brew-walnut hover:bg-brew-offwhite active:scale-[0.98] transition"
+          className="w-full rounded-full py-4 text-base font-semibold active:scale-[0.98] transition-all"
+          style={{ background: "linear-gradient(135deg,#fff 0%,#F5F0E8 100%)", color: "var(--brew-walnut)", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}
         >
           Send a message ✉️
         </button>

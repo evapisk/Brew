@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { name, major, university, year, goals, skills_offer, skills_want, organizations, favorite_cafes } = body;
+  const { name, industry, university, year, goals, skills_offer, skills_want, organizations, favorite_cafes } = body;
 
   if (!university || !year) {
     return NextResponse.json({ error: "University and year are required." }, { status: 400 });
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
 
   const updates: Record<string, unknown> = {
     ...(name !== undefined && { name }),
-    ...(major !== undefined && { major }),
+    ...(industry !== undefined && { industry }),
     university,
     year,
     goals: goals ?? [],
@@ -50,11 +50,16 @@ export async function POST(req: Request) {
 
   let { error } = await admin.from("users").update(updates).eq("auth_id", user.id);
 
-  // If favorite_cafes column doesn't exist yet (migration not run), retry without it
+  // Gracefully retry without columns that may not exist yet in the schema
   if (error?.message?.includes("favorite_cafes")) {
-    const { favorite_cafes: _dropped, ...withoutCafes } = updates;
-    void _dropped;
-    ({ error } = await admin.from("users").update(withoutCafes).eq("auth_id", user.id));
+    const { favorite_cafes: _fc, ...without } = updates;
+    void _fc;
+    ({ error } = await admin.from("users").update(without).eq("auth_id", user.id));
+  }
+  if (error?.message?.includes("industry")) {
+    const { industry: _ind, ...without } = updates;
+    void _ind;
+    ({ error } = await admin.from("users").update(without).eq("auth_id", user.id));
   }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
