@@ -87,7 +87,7 @@ export default function ProfilePage() {
   const [industry, setIndustry] = useState("");
   const [categories, setCategories] = useState<Categories>({ goals: [], skills_offer: [], skills_want: [] });
   const [loading, setLoading] = useState(true);
-  const [dirty, setDirty] = useState(false);
+
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -122,7 +122,6 @@ export default function ProfilePage() {
 
   const updateCategory = useCallback((field: keyof Categories, next: string[]) => {
     setCategories((c) => ({ ...c, [field]: next }));
-    setDirty(true);
     setSaved(false);
   }, []);
 
@@ -142,8 +141,7 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Save failed");
-      setDirty(false);
-      setSaved(true);
+            setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Could not save");
@@ -178,7 +176,7 @@ export default function ProfilePage() {
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto scroll-smooth-ios px-6 pt-6 pb-36 space-y-5">
+          <div className="flex-1 overflow-y-auto scroll-smooth-ios px-6 pt-6 pb-6 space-y-5">
 
             {/* Avatar card */}
             <div
@@ -206,23 +204,23 @@ export default function ProfilePage() {
             >
               <div>
                 <p className="section-label">NAME</p>
-                <input type="text" value={name} onChange={(e) => { setName(e.target.value); setDirty(true); setSaved(false); }}
+                <input type="text" value={name} onChange={(e) => { setName(e.target.value); setSaved(false); }}
                   placeholder="Your full name" className="brew-input" />
               </div>
               <div>
                 <p className="section-label">INDUSTRY</p>
-                <input type="text" value={industry} onChange={(e) => { setIndustry(e.target.value); setDirty(true); setSaved(false); }}
+                <input type="text" value={industry} onChange={(e) => { setIndustry(e.target.value); setSaved(false); }}
                   placeholder="e.g. Tech, Finance, Healthcare…" className="brew-input" />
               </div>
               <div>
                 <p className="section-label">YEAR</p>
-                <select value={year} onChange={(e) => { setYear(Number(e.target.value)); setDirty(true); setSaved(false); }} className="brew-input">
+                <select value={year} onChange={(e) => { setYear(Number(e.target.value)); setSaved(false); }} className="brew-input">
                   {[1,2,3,4,5,6].map((y) => <option key={y} value={y}>{YEAR_LABELS[y]}</option>)}
                 </select>
               </div>
               <div>
                 <p className="section-label">COLLEGE</p>
-                <input type="text" value={university} onChange={(e) => { setUniversity(e.target.value); setDirty(true); setSaved(false); }}
+                <input type="text" value={university} onChange={(e) => { setUniversity(e.target.value); setSaved(false); }}
                   placeholder="e.g. NYU, UCLA, MIT…" className="brew-input" />
               </div>
             </div>
@@ -278,14 +276,14 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {/* Sticky save */}
+          {/* Save bar — outside scroll container so it doesn't fight the nav */}
           <div
-            className="sticky bottom-0 px-6 py-5 shrink-0"
+            className="shrink-0 px-6 py-4"
             style={{ background: "rgba(232,228,220,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: "1px solid rgba(212,207,198,0.5)" }}
           >
             <button
               onClick={handleSave}
-              disabled={saving || (!dirty && !saved)}
+              disabled={saving}
               className="w-full rounded-full py-4 text-base font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
               style={{
                 background: saved ? "linear-gradient(135deg, #2E6B3A, #3A8A4A)" : "linear-gradient(135deg, #4A2C17, #3D1F0D)",
