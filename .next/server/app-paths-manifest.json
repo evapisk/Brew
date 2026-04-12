@@ -1,7 +1,0 @@
-{
-  "/auth/signup/page": "app/auth/signup/page.js",
-  "/auth/signin/page": "app/auth/signin/page.js",
-  "/matches/page": "app/matches/page.js",
-  "/onboarding/page": "app/onboarding/page.js",
-  "/discover/page": "app/discover/page.js"
-}
