@@ -39,7 +39,7 @@ export default function OnboardingPage() {
   const [error, setError] = useState("");
 
   // Import fields
-  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [profileUrl, setProfileUrl] = useState("");
   const [resumeText, setResumeText] = useState("");
 
   // Profile fields
@@ -73,7 +73,7 @@ export default function OnboardingPage() {
 
   // ── Import step ───────────────────────────────────────────────────────────
   async function handleImport() {
-    if (!linkedinUrl && !resumeText) {
+    if (!profileUrl && !resumeText) {
       setStep("goals");
       return;
     }
@@ -83,7 +83,7 @@ export default function OnboardingPage() {
       const res = await fetch("/api/onboard/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ linkedinUrl, resumeText }),
+        body: JSON.stringify({ profileUrl, resumeText }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Import failed");
@@ -185,26 +185,26 @@ export default function OnboardingPage() {
             <div>
               <h2 className="text-2xl font-bold text-brew-brown">Let&apos;s build your profile</h2>
               <p className="mt-1 text-brew-brown/60">
-                Paste your LinkedIn URL or resume and we&apos;ll pre-fill everything. Takes 90 seconds.
+                Drop a profile URL or paste your resume — we&apos;ll pre-fill everything with AI.
               </p>
             </div>
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-brew-brown/80">
-                LinkedIn URL <span className="text-brew-brown/30">(optional)</span>
+                Profile URL <span className="text-brew-brown/30">(LinkedIn, GitHub, portfolio — optional)</span>
               </label>
               <input
                 type="url"
-                value={linkedinUrl}
-                onChange={(e) => setLinkedinUrl(e.target.value)}
-                placeholder="https://linkedin.com/in/yourname"
+                value={profileUrl}
+                onChange={(e) => setProfileUrl(e.target.value)}
+                placeholder="https://linkedin.com/in/yourname or github.com/you"
                 className="w-full rounded-xl border border-brew-brown/20 bg-white px-4 py-3 text-brew-brown placeholder-brew-brown/30 outline-none focus:border-brew-latte focus:ring-2 focus:ring-brew-latte/20"
               />
             </div>
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-brew-brown/80">
-                Or paste your resume <span className="text-brew-brown/30">(optional)</span>
+                Or paste your resume / bio <span className="text-brew-brown/30">(optional)</span>
               </label>
               <textarea
                 rows={5}
@@ -222,7 +222,7 @@ export default function OnboardingPage() {
               disabled={loading}
               className="rounded-2xl bg-brew-brown py-4 font-semibold text-brew-cream shadow-md transition hover:bg-brew-brown/90 disabled:opacity-50"
             >
-              {loading ? "Analyzing with AI…" : linkedinUrl || resumeText ? "Auto-fill my profile →" : "Skip, I'll fill it in →"}
+              {loading ? "Analyzing with AI…" : profileUrl || resumeText ? "Auto-fill my profile →" : "Skip, I'll fill it in →"}
             </button>
           </div>
         )}

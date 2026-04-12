@@ -1,19 +1,7 @@
 {
-  "/api/auth/create-profile/route": "app/api/auth/create-profile/route.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/auth/signin/route": "app/api/auth/signin/route.js",
-  "/api/auth/signup/route": "app/api/auth/signup/route.js",
-  "/api/linkup/cafes/route": "app/api/linkup/cafes/route.js",
-  "/api/linkup/events/route": "app/api/linkup/events/route.js",
-  "/api/match/history/route": "app/api/match/history/route.js",
-  "/api/match/[id]/status/route": "app/api/match/[id]/status/route.js",
-  "/api/match/route": "app/api/match/route.js",
-  "/api/onboard/import/route": "app/api/onboard/import/route.js",
-  "/api/onboard/save/route": "app/api/onboard/save/route.js",
-  "/discover/page": "app/discover/page.js",
-  "/page": "app/page.js",
+  "/auth/signup/page": "app/auth/signup/page.js",
+  "/auth/signin/page": "app/auth/signin/page.js",
   "/matches/page": "app/matches/page.js",
   "/onboarding/page": "app/onboarding/page.js",
-  "/auth/signup/page": "app/auth/signup/page.js",
-  "/auth/signin/page": "app/auth/signin/page.js"
+  "/discover/page": "app/discover/page.js"
 }

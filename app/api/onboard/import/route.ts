@@ -1,21 +1,32 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { GOAL_TAGS, SKILL_TAGS } from "@/lib/tags";
+import { scrapeProfileUrl } from "@/lib/linkup";
 
 export async function POST(req: Request) {
   const client = new Anthropic();
-  const { linkedinUrl, resumeText } = await req.json();
+  const { profileUrl, resumeText } = await req.json();
 
-  if (!linkedinUrl && !resumeText) {
+  if (!profileUrl && !resumeText) {
     return NextResponse.json({}, { status: 200 });
   }
 
   const allGoals = Object.values(GOAL_TAGS).flat().join(", ");
   const allSkills = Object.values(SKILL_TAGS).flat().join(", ");
 
-  const content = linkedinUrl
-    ? `LinkedIn profile URL: ${linkedinUrl}`
-    : `Resume text:\n${resumeText}`;
+  // Build profile content: try scraping the URL first, fall back to URL string
+  let content: string;
+  if (profileUrl) {
+    const scraped = await scrapeProfileUrl(profileUrl);
+    if (scraped) {
+      content = `Profile page content (scraped from ${profileUrl}):\n\n${scraped}`;
+    } else {
+      // Scrape failed (blocked, login wall, etc.) — tell Claude we only have the URL
+      content = `Profile URL (page could not be scraped — infer what you can from the URL itself): ${profileUrl}`;
+    }
+  } else {
+    content = `Resume / profile text:\n${resumeText}`;
+  }
 
   try {
     const message = await client.messages.create({
@@ -56,7 +67,8 @@ ${content}`,
       ],
     });
 
-    const text = message.content[0].type === "text" ? message.content[0].text : "{}";
+    const raw = message.content[0].type === "text" ? message.content[0].text : "{}";
+    const text = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
     const parsed = JSON.parse(text);
     return NextResponse.json(parsed);
   } catch {

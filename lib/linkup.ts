@@ -16,6 +16,26 @@ export interface NetworkingEvent {
   url: string;
 }
 
+// ─── Profile scraping ─────────────────────────────────────────────────────────
+
+/**
+ * Attempt to scrape a profile URL (LinkedIn, GitHub, personal site, etc.)
+ * using Linkup's fetch. Returns the page content as markdown, or null if
+ * the fetch fails or is blocked.
+ */
+export async function scrapeProfileUrl(url: string): Promise<string | null> {
+  try {
+    const client = getClient();
+    const result = await client.fetch({ url, outputType: "markdown" });
+    const markdown = result?.markdown ?? "";
+    // If the page returned almost nothing (blocked/login wall), treat as failure
+    if (markdown.trim().length < 100) return null;
+    return markdown;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Cafes ────────────────────────────────────────────────────────────────────
 
 export async function getCafesNearUniversity(university: string): Promise<Cafe[]> {
