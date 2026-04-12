@@ -11,6 +11,7 @@ features: ai matching, info on people using linkup (reach feature)
           use either resume or linkedi api to populate data for profile, ask user their goals, have ai generated goals based off of their resume, have goals editable regardless
 
           follow up: feedback for algorithm to match better,
+          networking event finder using linkup, matches can attend together depending on filter (reach)
 
 target: students in general, building early connections to grow 
         open to everyone, mentors looking for mentees too
