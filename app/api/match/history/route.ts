@@ -40,9 +40,14 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // Only show accepted matches
+  const accepted = (rawMatches ?? []).filter(
+    (m: Record<string, unknown>) => m.status === "accepted"
+  );
+
   // Enrich with other user's profile
   const enriched = await Promise.all(
-    (rawMatches ?? []).map(async (m: Record<string, unknown>) => {
+    accepted.map(async (m: Record<string, unknown>) => {
       const otherId = m.user_a_id === profile.id ? m.user_b_id : m.user_a_id;
       const { data: other } = await admin
         .from("users")

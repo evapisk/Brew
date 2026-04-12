@@ -84,7 +84,7 @@ export default function ChatPage() {
     <main className="flex min-h-screen flex-col" style={{ background: "#F5F2EE" }}>
       {/* ── Header ── */}
       <div
-        className="shrink-0 px-4 pt-10 pb-3"
+        className="shrink-0 px-4 pt-14 pb-3"
         style={{
           background: "linear-gradient(160deg, #4A2410 0%, #3D1F0D 100%)",
           boxShadow: "0 4px 20px rgba(61,31,13,0.25)",

@@ -169,7 +169,7 @@ export default function ProfilePage() {
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
       {/* Header */}
-      <div className="brew-header px-6 pt-10 pb-5 shrink-0">
+      <div className="brew-header px-6 pt-14 pb-5 shrink-0">
         <h1 className="text-3xl font-rova text-white animate-fade-in" style={{ letterSpacing: "-0.01em" }}>profile</h1>
         <p className="text-xs font-lora text-white/50 mt-0.5 animate-fade-in" style={{ animationDelay: "0.1s" }}>
           your account

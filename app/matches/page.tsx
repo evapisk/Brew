@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MatchStrengthBadge } from "@/components/MatchStrengthBadge";
 import { getMatchStrength } from "@/lib/matching";
-import { CalendarDays, ChevronDown, ChevronUp, Ticket } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronUp, Ticket, RotateCcw } from "lucide-react";
 
 interface NetworkingEvent { title: string; description: string; url: string; }
 interface StoredMatch {
@@ -35,12 +35,26 @@ export default function MatchesPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [events, setEvents] = useState<Record<string, NetworkingEvent[]>>({});
   const [eventsLoading, setEventsLoading] = useState<Record<string, boolean>>({});
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     fetch("/api/match/history").then((r) => r.json())
       .then((d) => setMatches(d.matches ?? []))
       .catch(() => {}).finally(() => setLoading(false));
   }, []);
+
+  async function handleReset() {
+    if (!confirm("Reset all your matches? This cannot be undone.")) return;
+    setResetting(true);
+    try {
+      await fetch("/api/match/reset", { method: "POST" });
+      setMatches([]);
+    } catch {
+      // ignore
+    } finally {
+      setResetting(false);
+    }
+  }
 
   async function handleExpand(matchId: string, university: string) {
     const next = expanded === matchId ? null : matchId;
@@ -78,7 +92,7 @@ export default function MatchesPage() {
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
       {/* ── Header ── */}
-      <div className="brew-header px-6 pt-10 pb-5 shrink-0">
+      <div className="brew-header px-6 pt-14 pb-5 shrink-0">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-rova text-white" style={{ letterSpacing: "-0.01em" }}>matches</h1>
@@ -86,17 +100,32 @@ export default function MatchesPage() {
               {matches.length} connection{matches.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <Link
-            href="/discover"
-            className="rounded-full px-4 py-2 text-xs font-bold text-white transition-all"
-            style={{
-              background: "rgba(255,255,255,0.15)",
-              backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}
-          >
-            + Discover
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleReset}
+              disabled={resetting || matches.length === 0}
+              className="p-2 rounded-full transition-all active:scale-90"
+              style={{
+                background: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.18)",
+                color: "rgba(255,255,255,0.7)",
+              }}
+              aria-label="Reset matches"
+            >
+              <RotateCcw size={15} />
+            </button>
+            <Link
+              href="/discover"
+              className="rounded-full px-4 py-2 text-xs font-bold text-white transition-all"
+              style={{
+                background: "rgba(255,255,255,0.15)",
+                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(255,255,255,0.2)",
+              }}
+            >
+              + Discover
+            </Link>
+          </div>
         </div>
       </div>
 

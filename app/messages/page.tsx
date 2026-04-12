@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, Coffee, Ticket } from "lucide-react";
 
 interface Match {
   id: string;
@@ -10,6 +10,25 @@ interface Match {
   last_message?: string;
   last_message_at?: string;
   status: string;
+}
+
+interface Cafe {
+  name: string;
+  address?: string;
+  distance?: string;
+}
+
+interface Event {
+  name: string;
+  date?: string;
+  location?: string;
+}
+
+interface LinkupData {
+  cafes: Cafe[];
+  events: Event[];
+  loading: boolean;
+  error?: string;
 }
 
 function initials(name: string) {
@@ -43,6 +62,8 @@ export default function MessagesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [linkup, setLinkup] = useState<Record<string, LinkupData>>({});
 
   useEffect(() => {
     fetch("/api/match/history").then((r) => r.json())
@@ -50,6 +71,38 @@ export default function MessagesPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  async function toggleExpand(matchId: string, university: string) {
+    if (expanded === matchId) {
+      setExpanded(null);
+      return;
+    }
+    setExpanded(matchId);
+    if (linkup[matchId]) return; // already loaded
+
+    setLinkup((prev) => ({ ...prev, [matchId]: { cafes: [], events: [], loading: true } }));
+    try {
+      const [cafesRes, eventsRes] = await Promise.all([
+        fetch(`/api/linkup/cafes?university=${encodeURIComponent(university)}`),
+        fetch(`/api/linkup/events?university=${encodeURIComponent(university)}`),
+      ]);
+      const cafesData = cafesRes.ok ? await cafesRes.json() : { cafes: [] };
+      const eventsData = eventsRes.ok ? await eventsRes.json() : { events: [] };
+      setLinkup((prev) => ({
+        ...prev,
+        [matchId]: {
+          cafes: cafesData.cafes ?? [],
+          events: eventsData.events ?? [],
+          loading: false,
+        },
+      }));
+    } catch {
+      setLinkup((prev) => ({
+        ...prev,
+        [matchId]: { cafes: [], events: [], loading: false, error: "Failed to load" },
+      }));
+    }
+  }
 
   const newMatches = matches.filter((m) => !m.last_message);
   const conversations = matches.filter((m) => !!m.last_message);
@@ -60,7 +113,7 @@ export default function MessagesPage() {
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
       {/* ── Header ── */}
-      <div className="brew-header px-6 pt-10 pb-5 shrink-0">
+      <div className="brew-header px-6 pt-14 pb-5 shrink-0">
         <h1 className="text-3xl font-rova text-white animate-fade-in" style={{ letterSpacing: "-0.01em" }}>
           messages
         </h1>
@@ -157,32 +210,136 @@ export default function MessagesPage() {
 
           {filtered.map((m, i) => {
             const av = avatarStyle(m.other_user.name);
+            const isOpen = expanded === m.id;
+            const data = linkup[m.id];
             return (
-              <button
-                key={m.id}
-                onClick={() => router.push(`/messages/${m.id}`)}
-                className="flex items-center gap-4 w-full px-4 py-3.5 text-left active:bg-white transition-colors animate-fade-in-up"
-                style={{
-                  borderBottom: "1px solid rgba(240,237,232,0.8)",
-                  animationDelay: `${i * 0.06}s`,
-                }}
-              >
+              <div key={m.id} className="animate-fade-in-up" style={{ animationDelay: `${i * 0.06}s` }}>
                 <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                  style={{ background: av.bg, color: av.text, boxShadow: "0 2px 8px rgba(61,31,13,0.14)" }}
+                  className="flex items-center gap-4 w-full px-4 py-3.5 text-left"
+                  style={{ borderBottom: isOpen ? "none" : "1px solid rgba(240,237,232,0.8)" }}
                 >
-                  {initials(m.other_user.name)}
+                  {/* Avatar — taps to open chat */}
+                  <button
+                    onClick={() => router.push(`/messages/${m.id}`)}
+                    className="shrink-0 active:scale-95 transition-transform"
+                  >
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold"
+                      style={{ background: av.bg, color: av.text, boxShadow: "0 2px 8px rgba(61,31,13,0.14)" }}
+                    >
+                      {initials(m.other_user.name)}
+                    </div>
+                  </button>
+
+                  {/* Name + last message — taps to open chat */}
+                  <button
+                    onClick={() => router.push(`/messages/${m.id}`)}
+                    className="flex-1 min-w-0 text-left"
+                  >
+                    <div className="flex items-center justify-between mb-0.5">
+                      <p className="font-bold text-brew-walnut text-sm" style={{ letterSpacing: "-0.01em" }}>
+                        {m.other_user.name}
+                      </p>
+                      <p className="text-[11px] text-brew-khaki shrink-0 ml-2">{timeAgo(m.last_message_at)}</p>
+                    </div>
+                    <p className="text-xs text-brew-khaki truncate">{m.last_message}</p>
+                  </button>
+
+                  {/* Expand button */}
+                  <button
+                    onClick={() => toggleExpand(m.id, m.other_user.university)}
+                    className="shrink-0 ml-1 p-1.5 rounded-full active:scale-90 transition-transform"
+                    style={{ color: "var(--brew-khaki)" }}
+                    aria-label="Toggle meet-up suggestions"
+                  >
+                    {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <p className="font-bold text-brew-walnut text-sm" style={{ letterSpacing: "-0.01em" }}>
-                      {m.other_user.name}
-                    </p>
-                    <p className="text-[11px] text-brew-khaki shrink-0 ml-2">{timeAgo(m.last_message_at)}</p>
+
+                {/* ── Linkup dropdown ── */}
+                {isOpen && (
+                  <div
+                    className="mx-4 mb-3 rounded-xl overflow-hidden animate-fade-in-up"
+                    style={{
+                      background: "#fff",
+                      border: "1px solid rgba(212,207,198,0.7)",
+                      boxShadow: "0 2px 12px rgba(61,31,13,0.08)",
+                    }}
+                  >
+                    {data?.loading && (
+                      <div className="px-4 py-4 space-y-2">
+                        <div className="h-3 skeleton rounded w-40" />
+                        <div className="h-3 skeleton rounded w-52" />
+                        <div className="h-3 skeleton rounded w-36" />
+                      </div>
+                    )}
+
+                    {data && !data.loading && (
+                      <>
+                        {/* Coffee shops */}
+                        {data.cafes.length > 0 && (
+                          <div className="px-4 pt-3 pb-2">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <Coffee size={13} style={{ color: "var(--brew-accent)" }} />
+                              <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "var(--brew-accent)" }}>
+                                Coffee spots nearby
+                              </p>
+                            </div>
+                            <div className="space-y-1.5">
+                              {data.cafes.slice(0, 3).map((c, ci) => (
+                                <div key={ci} className="flex items-start justify-between gap-2">
+                                  <p className="text-xs font-semibold text-brew-walnut leading-tight">{c.name}</p>
+                                  {c.distance && (
+                                    <p className="text-[11px] text-brew-khaki shrink-0">{c.distance}</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {data.cafes.length > 0 && data.events.length > 0 && (
+                          <div style={{ height: "1px", background: "rgba(212,207,198,0.5)", margin: "0 1rem" }} />
+                        )}
+
+                        {/* Events */}
+                        {data.events.length > 0 && (
+                          <div className="px-4 pt-2 pb-3">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <Ticket size={13} style={{ color: "var(--brew-accent)" }} />
+                              <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "var(--brew-accent)" }}>
+                                Events on campus
+                              </p>
+                            </div>
+                            <div className="space-y-1.5">
+                              {data.events.slice(0, 3).map((e, ei) => (
+                                <div key={ei} className="flex items-start justify-between gap-2">
+                                  <p className="text-xs font-semibold text-brew-walnut leading-tight">{e.name}</p>
+                                  {e.date && (
+                                    <p className="text-[11px] text-brew-khaki shrink-0">{e.date}</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {data.cafes.length === 0 && data.events.length === 0 && (
+                          <div className="px-4 py-4 text-center">
+                            <p className="text-xs text-brew-khaki font-lora italic">No suggestions available right now</p>
+                          </div>
+                        )}
+
+                        {data.error && (
+                          <div className="px-4 py-3 text-center">
+                            <p className="text-xs text-brew-khaki">{data.error}</p>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
-                  <p className="text-xs text-brew-khaki truncate">{m.last_message}</p>
-                </div>
-              </button>
+                )}
+              </div>
             );
           })}
         </div>
