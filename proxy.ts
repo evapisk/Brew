@@ -6,7 +6,7 @@ const PROTECTED = ["/discover", "/matches", "/onboarding"];
 // Routes only for unauthenticated users
 const AUTH_ONLY = ["/auth/signup", "/auth/signin"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next({ request });
 
