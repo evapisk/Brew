@@ -87,7 +87,6 @@ export default function ProfilePage() {
   const [industry, setIndustry] = useState("");
   const [categories, setCategories] = useState<Categories>({ goals: [], skills_offer: [], skills_want: [] });
   const [loading, setLoading] = useState(true);
-
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -114,14 +113,14 @@ export default function ProfilePage() {
           .single());
       }
       if (data) {
-        setName(data.name ?? "");
-        setUniversity(data.university ?? "");
-        setYear(data.year ?? 1);
-        setIndustry(data.industry ?? "");
+        setName((data as any).name ?? "");
+        setUniversity((data as any).university ?? "");
+        setYear((data as any).year ?? 1);
+        setIndustry((data as any).industry ?? "");
         setCategories({
-          goals: data.goals ?? [],
-          skills_offer: data.skills_offer ?? [],
-          skills_want: data.skills_want ?? [],
+          goals: (data as any).goals ?? [],
+          skills_offer: (data as any).skills_offer ?? [],
+          skills_want: (data as any).skills_want ?? [],
         });
       }
       setLoading(false);
@@ -149,7 +148,7 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Save failed");
-            setSaved(true);
+      setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Could not save");
@@ -249,7 +248,7 @@ export default function ProfilePage() {
               <div className="border-t border-[#EAE6DF]" />
               <TagSection
                 label="YOUR GOALS"
-                sublabel="What you're working toward"
+                sublabel="What you&apos;re working toward"
                 tags={categories.goals}
                 all={ALL_GOALS}
                 color="bg-brew-accent"
@@ -284,7 +283,7 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {/* Save bar — outside scroll container so it doesn't fight the nav */}
+          {/* Save bar */}
           <div
             className="shrink-0 px-6 py-4"
             style={{ background: "rgba(232,228,220,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: "1px solid rgba(212,207,198,0.5)" }}

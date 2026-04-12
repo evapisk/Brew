@@ -42,6 +42,7 @@ function TagSection({
         <p className="section-label">{label}</p>
         <p className="text-xs text-brew-khaki mt-0.5">{sublabel}</p>
       </div>
+
       <div className="flex flex-wrap gap-2 min-h-[2rem]">
         {tags.length === 0 && (
           <p className="text-xs text-brew-khaki italic">None selected — tap + to add</p>
@@ -63,6 +64,7 @@ function TagSection({
           </button>
         )}
       </div>
+
       {open && remaining.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-2 border-t border-[#EAE6DF]">
           {remaining.map((tag) => (
@@ -173,12 +175,13 @@ export default function OnboardingPage() {
 
       <div className="flex-1 overflow-y-auto px-6 pt-6 pb-36 space-y-5">
 
+        {/* ── STAGE 1: Upload ─────────────────────────────────────────── */}
         {step === "upload" && (
           <>
             <div className="animate-fade-in-up">
               <h2 className="text-2xl font-bold text-brew-walnut" style={{ letterSpacing: "-0.01em" }}>Hey there.</h2>
               <p className="mt-1 text-sm font-lora text-brew-midbrown">
-                Upload your resume and describe your goals — we'll build your profile automatically.
+                Upload your resume and describe your goals — we&apos;ll build your profile automatically.
               </p>
             </div>
 
@@ -212,19 +215,20 @@ export default function OnboardingPage() {
               <textarea rows={4} value={goalsDescription} onChange={(e) => setGoalsDescription(e.target.value)}
                 placeholder="e.g. I want to break into VC, launch a startup, and improve my Python skills before graduation…"
                 className="brew-input resize-none" />
-              <p className="text-xs text-brew-khaki">Write freely — we'll extract the right tags for you.</p>
+              <p className="text-xs text-brew-khaki">Write freely — we&apos;ll extract the right tags for you.</p>
             </div>
 
             {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
           </>
         )}
 
+        {/* ── STAGE 2: Review ─────────────────────────────────────────── */}
         {step === "review" && (
           <>
             <div className="animate-fade-in-up">
-              <h2 className="text-2xl font-bold text-brew-walnut" style={{ letterSpacing: "-0.01em" }}>Here's your profile.</h2>
+              <h2 className="text-2xl font-bold text-brew-walnut" style={{ letterSpacing: "-0.01em" }}>Here&apos;s your profile.</h2>
               <p className="mt-1 text-sm font-lora text-brew-midbrown">
-                We built this from your resume and goals. Tweak anything that doesn't fit.
+                We built this from your resume and goals. Tweak anything that doesn&apos;t fit.
               </p>
             </div>
 
