@@ -48,6 +48,28 @@ export async function POST(req: Request) {
     onboarded: true,
   };
 
+  // First verify the user row exists
+  const { data: existingRow } = await admin
+    .from("users")
+    .select("id, auth_id")
+    .eq("auth_id", user.id)
+    .maybeSingle();
+
+  if (!existingRow) {
+    // Row not found by auth_id — try to find by email and patch auth_id
+    const { data: byEmail } = await admin
+      .from("users")
+      .select("id")
+      .eq("email", user.email!)
+      .maybeSingle();
+
+    if (byEmail) {
+      await admin.from("users").update({ auth_id: user.id }).eq("id", byEmail.id);
+    } else {
+      return NextResponse.json({ error: "User profile not found. Please sign out and sign back in." }, { status: 404 });
+    }
+  }
+
   let { error } = await admin.from("users").update(updates).eq("auth_id", user.id);
 
   // Gracefully retry without columns that may not exist yet in the schema
