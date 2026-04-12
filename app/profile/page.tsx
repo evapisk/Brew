@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
+<<<<<<< HEAD
 import { LogOut, Check } from "lucide-react";
 
 const YEAR_LABELS: Record<number, string> = {
@@ -20,9 +21,102 @@ interface ProfileData {
   skills_offer: string[];
   skills_want: string[];
 }
+=======
+import { LogOut, Check, X, Plus } from "lucide-react";
+import { GOAL_TAGS, SKILL_TAGS } from "@/lib/tags";
+>>>>>>> c740b2f (ai resume extraction)
 
+const ALL_GOALS = Object.values(GOAL_TAGS).flat() as string[];
+const ALL_SKILLS = Object.values(SKILL_TAGS).flat() as string[];
+
+const YEAR_LABELS: Record<number, string> = {
+  1: "Freshman", 2: "Sophomore", 3: "Junior",
+  4: "Senior", 5: "Master's", 6: "PhD",
+};
+
+interface Categories {
+  goals: string[];
+  skills_offer: string[];
+  skills_want: string[];
+}
+
+// ── Editable tag section (reused from onboarding) ─────────────────────────────
+function TagSection({
+  label, sublabel, tags, all, color, onChange,
+}: {
+  label: string;
+  sublabel: string;
+  tags: string[];
+  all: string[];
+  color: string;
+  onChange: (next: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const remaining = all.filter((t) => !tags.includes(t));
+
+  function remove(tag: string) { onChange(tags.filter((t) => t !== tag)); }
+  function add(tag: string) {
+    onChange([...tags, tag]);
+    if (remaining.length === 1) setOpen(false);
+  }
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="section-label">{label}</p>
+        <p className="text-xs text-brew-khaki mt-0.5">{sublabel}</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 min-h-[2rem]">
+        {tags.length === 0 && (
+          <p className="text-xs text-brew-khaki italic">None — tap + to add</p>
+        )}
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className={`flex items-center gap-1.5 rounded-full ${color} text-white px-3 py-1 text-xs font-medium`}
+          >
+            {tag}
+            <button
+              onClick={() => remove(tag)}
+              className="opacity-70 hover:opacity-100 transition"
+              aria-label={`Remove ${tag}`}
+            >
+              <X size={11} />
+            </button>
+          </span>
+        ))}
+        {remaining.length > 0 && (
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="flex items-center gap-1 rounded-full border border-dashed border-brew-beige text-brew-khaki px-3 py-1 text-xs hover:border-brew-accent hover:text-brew-accent transition"
+          >
+            <Plus size={11} /> Add
+          </button>
+        )}
+      </div>
+
+      {open && remaining.length > 0 && (
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-[#EAE6DF]">
+          {remaining.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => add(tag)}
+              className="tag-pill tag-pill-inactive text-xs"
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const router = useRouter();
+<<<<<<< HEAD
   const [profile, setProfile] = useState<ProfileData>({
     name: "", email: "", major: "", university: "", year: 1,
     goals: [], skills_offer: [], skills_want: [],
@@ -31,12 +125,26 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+=======
+  const [email, setEmail] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(null);
+  const [university, setUniversity] = useState<string | null>(null);
+  const [year, setYear] = useState<number | null>(null);
+  const [categories, setCategories] = useState<Categories>({
+    goals: [], skills_offer: [], skills_want: [],
+  });
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+>>>>>>> c740b2f (ai resume extraction)
 
+  // Load profile on mount
   useEffect(() => {
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
+<<<<<<< HEAD
 
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push("/auth/signin"); return; }
@@ -95,6 +203,57 @@ export default function ProfilePage() {
       setSaving(false);
     }
   }
+=======
+    supabase.auth.getUser().then(async ({ data: authData }) => {
+      if (!authData.user) return;
+      setEmail(authData.user.email ?? null);
+
+      const { data: profile } = await (supabase
+        .from("users")
+        .select("name, university, year, goals, skills_offer, skills_want")
+        .eq("auth_id", authData.user.id)
+        .single() as any);
+
+      if (profile) {
+        setName(profile.name ?? null);
+        setUniversity(profile.university ?? null);
+        setYear(profile.year ?? null);
+        setCategories({
+          goals: profile.goals ?? [],
+          skills_offer: profile.skills_offer ?? [],
+          skills_want: profile.skills_want ?? [],
+        });
+      }
+    });
+  }, []);
+>>>>>>> c740b2f (ai resume extraction)
+
+  // Track changes
+  const updateCategory = useCallback(
+    (field: keyof Categories, next: string[]) => {
+      setCategories((c) => ({ ...c, [field]: next }));
+      setDirty(true);
+      setSaved(false);
+    },
+    []
+  );
+
+  async function handleSaveCategories() {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/users/categories", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(categories),
+      });
+      if (!res.ok) throw new Error("Save failed");
+      setDirty(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function handleSignOut() {
     const supabase = createBrowserClient(
@@ -107,6 +266,7 @@ export default function ProfilePage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
+<<<<<<< HEAD
       {/* ── Header ── */}
       <div className="bg-brew-walnut px-6 pt-10 pb-5 shrink-0">
         <h1 className="text-3xl font-rova text-white">profile</h1>
@@ -116,6 +276,80 @@ export default function ProfilePage() {
       {loading ? (
         <div className="flex flex-1 items-center justify-center">
           <p className="text-sm text-brew-khaki animate-pulse">Loading…</p>
+=======
+      {/* Header */}
+      <div className="bg-brew-walnut px-6 pt-14 pb-6 shrink-0">
+        <h1 className="text-xl font-bold text-white">brew</h1>
+        <p className="text-xs text-white/50 mt-0.5">your profile</p>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-6 pt-6 pb-28 space-y-5">
+
+        {/* Account info */}
+        <div className="rounded-xl bg-white card-shadow px-5 py-4 space-y-1">
+          <p className="section-label">ACCOUNT</p>
+          <p className="text-sm font-semibold text-brew-walnut">{name ?? email ?? "Loading…"}</p>
+          {university && year && (
+            <p className="text-xs text-brew-khaki">
+              {YEAR_LABELS[year]} · {university}
+            </p>
+          )}
+          {!university && (
+            <p className="text-xs text-brew-khaki">{email ?? ""}</p>
+          )}
+        </div>
+
+        {/* Categories card */}
+        <div className="rounded-xl bg-white card-shadow px-5 py-5 space-y-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-brew-walnut">Your categories</p>
+            {dirty && (
+              <button
+                onClick={handleSaveCategories}
+                disabled={saving}
+                className="flex items-center gap-1.5 rounded-full bg-brew-walnut text-white text-xs font-semibold px-3 py-1.5 hover:bg-brew-body transition disabled:opacity-50"
+              >
+                {saving ? "Saving…" : saved ? <><Check size={11} /> Saved</> : "Save changes"}
+              </button>
+            )}
+            {saved && !dirty && (
+              <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                <Check size={12} /> Saved
+              </span>
+            )}
+          </div>
+
+          <TagSection
+            label="SKILLS YOU OFFER"
+            sublabel="What you can teach — drives who gets matched to you"
+            tags={categories.skills_offer}
+            all={ALL_SKILLS}
+            color="bg-brew-walnut"
+            onChange={(next) => updateCategory("skills_offer", next)}
+          />
+
+          <div className="border-t border-[#EAE6DF]" />
+
+          <TagSection
+            label="YOUR GOALS"
+            sublabel="What you're working toward — used to find aligned matches"
+            tags={categories.goals}
+            all={ALL_GOALS}
+            color="bg-brew-accent"
+            onChange={(next) => updateCategory("goals", next)}
+          />
+
+          <div className="border-t border-[#EAE6DF]" />
+
+          <TagSection
+            label="SKILLS YOU WANT TO LEARN"
+            sublabel="What you want from a match — used to find complementary skills"
+            tags={categories.skills_want}
+            all={ALL_SKILLS}
+            color="bg-[#4A6B9B]"
+            onChange={(next) => updateCategory("skills_want", next)}
+          />
+>>>>>>> c740b2f (ai resume extraction)
         </div>
       ) : (
         <>

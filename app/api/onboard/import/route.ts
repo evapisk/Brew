@@ -1,68 +1,62 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { GOAL_TAGS, SKILL_TAGS } from "@/lib/tags";
-import { scrapeProfileUrl } from "@/lib/linkup";
 
 export async function POST(req: Request) {
   const client = new Anthropic();
-  const { profileUrl, resumeText } = await req.json();
+  const { resumeText, goalsDescription } = await req.json();
 
-  if (!profileUrl && !resumeText) {
+  if (!resumeText && !goalsDescription) {
     return NextResponse.json({}, { status: 200 });
   }
 
   const allGoals = Object.values(GOAL_TAGS).flat().join(", ");
   const allSkills = Object.values(SKILL_TAGS).flat().join(", ");
 
-  // Build profile content: try scraping the URL first, fall back to URL string
-  let content: string;
-  if (profileUrl) {
-    const scraped = await scrapeProfileUrl(profileUrl);
-    if (scraped) {
-      content = `Profile page content (scraped from ${profileUrl}):\n\n${scraped}`;
-    } else {
-      // Scrape failed (blocked, login wall, etc.) — tell Claude we only have the URL
-      content = `Profile URL (page could not be scraped — infer what you can from the URL itself): ${profileUrl}`;
-    }
-  } else {
-    content = `Resume / profile text:\n${resumeText}`;
-  }
-
   try {
     const message = await client.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 600,
-      system: "You are a profile parser for a college student networking app. Extract structured data. Respond only with JSON.",
+      max_tokens: 800,
+      system: `You are a profile parser for a college student networking app.
+Extract structured data from two separate inputs:
+1. A resume (for skills and background)
+2. A goals description (for goals and what they want to learn)
+
+Always respond only with valid JSON — no markdown, no preamble.`,
       messages: [
         {
           role: "user",
-          content: `Parse the following student profile and return structured data.
+          content: `Parse the following student inputs and return structured data.
 
-Available goal tags: ${allGoals}
-Available skill tags: ${allSkills}
+Available goal tags (pick from ONLY these): ${allGoals}
 
-From the profile, infer:
-- university: the university name (short form, e.g. "NYU", "MIT", "Stanford")
-- year: academic year as integer 1-6 (1=freshman, 2=sophomore, 3=junior, 4=senior, 5=masters, 6=phd)
-- goals: array of up to 5 matching goal tags from the list above
-- skills_offer: array of matching skill tags the student likely has
-- skills_want: array of matching skill tags they'd benefit from learning
-- organizations: array of clubs/orgs mentioned (free text)
+Available skill tags (pick from ONLY these): ${allSkills}
 
-If a field can't be determined, omit it.
+Instructions:
+- skills_offer: skills the student already has, extracted from the RESUME
+- goals: tags that best match their GOALS DESCRIPTION (up to 5)
+- skills_want: skills they would likely need to achieve their stated goals (inferred from goals description, picked from skill tags)
+- university: extract from resume if present (short form, e.g. "NYU", "MIT")
+- year: extract from resume as integer 1-6 (1=freshman … 6=phd), omit if unclear
+- organizations: clubs or orgs mentioned in resume (free text array)
 
-Respond with this JSON format:
+Omit any field you cannot determine with confidence.
+
+Respond with this exact JSON shape:
 {
+  "skills_offer": ["tag1", "tag2"],
+  "goals": ["tag1", "tag2"],
+  "skills_want": ["tag1", "tag2"],
   "university": "...",
   "year": 2,
-  "goals": ["tag1", "tag2"],
-  "skills_offer": ["tag1"],
-  "skills_want": ["tag2"],
   "organizations": ["Club A"]
 }
 
-Profile:
-${content}`,
+--- RESUME ---
+${resumeText || "(not provided)"}
+
+--- GOALS DESCRIPTION ---
+${goalsDescription || "(not provided)"}`,
         },
       ],
     });
