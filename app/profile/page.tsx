@@ -100,11 +100,19 @@ export default function ProfilePage() {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push("/auth/signin"); return; }
       setEmail(user.email ?? "");
-      const { data } = await supabase
+      // Try with industry first, fall back without it if column doesn't exist yet
+      let { data, error: fetchError } = await supabase
         .from("users")
         .select("name, university, year, industry, goals, skills_offer, skills_want")
         .eq("auth_id", user.id)
         .single();
+      if (fetchError?.code === "42703" || fetchError?.message?.includes("industry")) {
+        ({ data } = await supabase
+          .from("users")
+          .select("name, university, year, goals, skills_offer, skills_want")
+          .eq("auth_id", user.id)
+          .single());
+      }
       if (data) {
         setName(data.name ?? "");
         setUniversity(data.university ?? "");
