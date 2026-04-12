@@ -122,7 +122,7 @@ export default function DiscoverPage() {
   const interestTags = [...current.breakdown.sharedGoals, ...current.breakdown.aOffersB].slice(0, 6);
 
   return (
-    <main className="flex min-h-screen flex-col bg-brew-offwhite relative">
+    <main className="flex min-h-screen flex-col bg-brew-offwhite md:h-full">
       {/* ── Video header ── */}
       <div className="relative shrink-0 overflow-hidden" style={{ minHeight: 116 }}>
         <video
@@ -168,7 +168,7 @@ export default function DiscoverPage() {
       </div>
 
       {/* ── Card ── */}
-      <div className="flex-1 px-4 pt-5 pb-36 overflow-y-auto scroll-smooth-ios">
+      <div className="flex-1 px-4 pt-5 pb-4 overflow-y-auto scroll-smooth-ios">
         <div
           ref={cardRef}
           className={cardAnim}
@@ -318,12 +318,12 @@ export default function DiscoverPage() {
       </div>
 
       {/* ── Action buttons ── */}
-      <div className="absolute bottom-24 left-0 right-0 flex items-center justify-center gap-5 px-8 py-4 pointer-events-none">
+      <div className="shrink-0 flex items-center justify-center gap-5 px-8 pt-3 pb-24">
         {/* Pass */}
         <button
           onClick={() => swipe("left")}
           disabled={!!swiping}
-          className="pointer-events-auto w-16 h-16 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-40"
+          className="w-16 h-16 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-40"
           style={{
             background: "#fff",
             boxShadow: "0 2px 8px rgba(61,31,13,0.08), 0 8px 24px rgba(61,31,13,0.10)",
@@ -339,7 +339,7 @@ export default function DiscoverPage() {
         {/* Info */}
         <button
           onClick={() => setShowInfo((v) => !v)}
-          className="pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center active:scale-90"
+          className="w-12 h-12 rounded-full flex items-center justify-center active:scale-90"
           style={{
             background: showInfo ? "var(--brew-walnut)" : "#fff",
             boxShadow: showInfo
@@ -359,7 +359,7 @@ export default function DiscoverPage() {
         <button
           onClick={() => swipe("right")}
           disabled={!!swiping}
-          className="pointer-events-auto w-16 h-16 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-40"
+          className="w-16 h-16 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-40"
           style={{
             background: "linear-gradient(135deg, #4A2C17, #3D1F0D)",
             boxShadow: "0 4px 16px rgba(61,31,13,0.35), 0 8px 28px rgba(61,31,13,0.22)",
