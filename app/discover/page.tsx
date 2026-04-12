@@ -117,7 +117,7 @@ export default function DiscoverPage() {
   );
 
   const cardAnim = swiping === "left" ? "animate-swipe_left" : swiping === "right" ? "animate-swipe_right" : "";
-  const matchPct = Math.round(current.score * 100);
+  const matchPct = Math.min(99, Math.round((current.score / 300) * 100));
   const [g1, g2] = avatarGradient(current.user.name);
   const interestTags = [...current.breakdown.sharedGoals, ...current.breakdown.aOffersB].slice(0, 6);
 
@@ -168,7 +168,7 @@ export default function DiscoverPage() {
       </div>
 
       {/* ── Card ── */}
-      <div className="flex-1 px-4 pt-5 pb-28 overflow-y-auto scroll-smooth-ios">
+      <div className="flex-1 px-4 pt-5 pb-36 overflow-y-auto scroll-smooth-ios">
         <div
           ref={cardRef}
           className={cardAnim}
@@ -318,7 +318,7 @@ export default function DiscoverPage() {
       </div>
 
       {/* ── Action buttons ── */}
-      <div className="absolute bottom-20 left-0 right-0 flex items-center justify-center gap-5 px-8 py-4 pointer-events-none">
+      <div className="absolute bottom-24 left-0 right-0 flex items-center justify-center gap-5 px-8 py-4 pointer-events-none">
         {/* Pass */}
         <button
           onClick={() => swipe("left")}
