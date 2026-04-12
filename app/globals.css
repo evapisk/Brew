@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brew-brown: #4A2C17;
+  --brew-latte: #C9A87C;
+  --brew-cream: #F5EFE6;
+  --brew-steam: #EAE0D5;
+}
+
+body {
+  background-color: var(--brew-cream);
+  color: var(--brew-brown);
+}
+
+/* Card swipe shadow */
+.card-shadow {
+  box-shadow: 0 8px 32px rgba(74, 44, 23, 0.12);
+}
