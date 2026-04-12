@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import { MatchStrengthBadge } from "@/components/MatchStrengthBadge";
-import { CalendarDays, Coffee, ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { X, Heart, Info, ChevronUp } from "lucide-react";
 
 interface MatchUser {
   id: string; name: string; university: string; year: number;
@@ -20,14 +20,18 @@ const YEAR_LABELS: Record<number, string> = {
   1: "Freshman", 2: "Sophomore", 3: "Junior", 4: "Senior", 5: "Master's", 6: "PhD",
 };
 
+function initials(name: string) {
+  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+}
+
 export default function DiscoverPage() {
+  const router = useRouter();
   const [matches, setMatches] = useState<MatchResult[]>([]);
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [swiping, setSwiping] = useState<"left" | "right" | null>(null);
-  const [showAgenda, setShowAgenda] = useState(false);
-  const [suggestedCafe, setSuggestedCafe] = useState<{ name: string; url: string } | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,25 +41,12 @@ export default function DiscoverPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const fetchCafe = useCallback(async (university: string) => {
-    setSuggestedCafe(null);
-    try {
-      const res = await fetch(`/api/linkup/cafes?university=${encodeURIComponent(university)}`);
-      const d = await res.json();
-      if (d.cafes?.[0]) setSuggestedCafe({ name: d.cafes[0].name, url: d.cafes[0].url });
-    } catch { /* non-critical */ }
-  }, []);
-
-  useEffect(() => {
-    if (matches[index]?.user.university) fetchCafe(matches[index].user.university);
-  }, [index, matches, fetchCafe]);
-
   const current = matches[index];
 
   async function swipe(direction: "left" | "right") {
     if (!current) return;
     setSwiping(direction);
-    setShowAgenda(false);
+    setShowInfo(false);
     if (current.matchId) {
       await fetch(`/api/match/${current.matchId}/status`, {
         method: "PATCH", headers: { "Content-Type": "application/json" },
@@ -64,13 +55,11 @@ export default function DiscoverPage() {
     }
     await new Promise((r) => setTimeout(r, 320));
     setSwiping(null);
-    setIndex((i) => i + 1);
-  }
-
-  function calendarUrl(match: MatchResult) {
-    const title = encodeURIComponent(`Coffee chat — Brew match with ${match.user.name}`);
-    const details = encodeURIComponent(match.agenda.join("\n"));
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}`;
+    if (direction === "right" && current.matchId) {
+      router.push(`/matches/celebrate?name=${encodeURIComponent(current.user.name)}&matchId=${current.matchId}`);
+    } else {
+      setIndex((i) => i + 1);
+    }
   }
 
   if (loading) return (
@@ -93,9 +82,9 @@ export default function DiscoverPage() {
 
   if (!current) return (
     <div className="flex min-h-screen flex-col bg-brew-offwhite">
-      <div className="bg-brew-walnut px-6 pt-14 pb-6">
-        <h1 className="text-2xl font-bold text-white">brew</h1>
-        <p className="text-sm text-white/60">find your next coffee chat</p>
+      <div className="bg-brew-walnut px-6 pt-10 pb-5">
+        <h1 className="text-3xl font-rova text-white">brew</h1>
+        <p className="text-sm font-lora text-white/60 mt-0.5">find your next coffee chat</p>
       </div>
       <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
         <div className="text-4xl mb-3">✓</div>
@@ -107,135 +96,140 @@ export default function DiscoverPage() {
   );
 
   const cardAnim = swiping === "left" ? "animate-swipe_left" : swiping === "right" ? "animate-swipe_right" : "";
+  const matchPct = Math.round(current.score * 100);
+
+  // Collect tags to show (interests = shared goals + their skills)
+  const interestTags = [
+    ...current.breakdown.sharedGoals,
+    ...current.breakdown.aOffersB,
+  ].slice(0, 6);
 
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
-      {/* ── Green header ── */}
-      <div className="bg-brew-walnut px-6 pt-14 pb-5 shrink-0">
+      {/* ── Header ── */}
+      <div className="bg-brew-walnut px-6 pt-10 pb-5 shrink-0">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-white">brew</h1>
-            <p className="text-xs text-white/50">find your next coffee chat</p>
+            <h1 className="text-3xl font-rova text-white">brew</h1>
+            <p className="text-xs font-lora text-white/50 mt-0.5">find your next coffee chat</p>
           </div>
-          <span className="text-white/50 text-xs">
-            {matches.length - index} left
-          </span>
-        </div>
-        {/* Progress dots */}
-        <div className="flex gap-1 mt-4">
-          {matches.map((_, i) => (
-            <div key={i} className={`h-1 rounded-full transition-all duration-300 ${
-              i === index ? "flex-[2] bg-white" : i < index ? "flex-1 bg-white/30" : "flex-1 bg-white/15"
-            }`} />
-          ))}
+          <span className="text-white/40 text-xs">{matches.length - index} left</span>
         </div>
       </div>
 
       {/* ── Card ── */}
-      <div className="flex-1 px-4 pt-5 pb-28 overflow-y-auto">
+      <div className="flex-1 px-4 pt-5 pb-32 overflow-y-auto">
         <div ref={cardRef} className={cardAnim}>
-          <div className="rounded-xl bg-white card-shadow overflow-hidden">
+          <div className="rounded-2xl bg-white card-shadow overflow-hidden">
 
-            {/* Card header */}
-            <div className="px-5 pt-5 pb-4 border-b border-[#F0EDE8]">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-bold text-brew-walnut">{current.user.name}</h2>
-                  <p className="text-sm text-brew-midbrown mt-0.5">
-                    {YEAR_LABELS[current.user.year]} · {current.user.university}
-                  </p>
-                </div>
-                <MatchStrengthBadge strength={current.strength} />
+            {/* Avatar band */}
+            <div className="bg-[#EDE8E0] px-5 pt-8 pb-5 flex flex-col items-center relative">
+              {/* Match % badge */}
+              <div className="absolute top-4 right-4 rounded-full bg-brew-walnut px-3 py-1 text-xs font-bold text-white">
+                {matchPct}% match
               </div>
-              <p className="mt-2 text-xs text-brew-khaki italic">{current.strength.reason}</p>
+              {/* Avatar circle */}
+              <div className="w-20 h-20 rounded-full bg-brew-walnut flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">{initials(current.user.name)}</span>
+              </div>
+              <h2 className="mt-3 text-lg font-bold text-brew-walnut">{current.user.name}</h2>
+              <p className="text-sm text-brew-midbrown font-lora mt-0.5">
+                {YEAR_LABELS[current.user.year]} · {current.user.university}
+              </p>
             </div>
 
-            {/* AI blurb */}
-            <div className="px-5 py-4 border-b border-[#F0EDE8]">
-              <p className="section-label">WHY YOU&apos;LL CLICK</p>
-              <p className="text-sm text-brew-body leading-relaxed">{current.match_reason}</p>
-            </div>
-
-            {/* Skills */}
-            <div className="px-5 py-4 space-y-3 border-b border-[#F0EDE8]">
-              {current.breakdown.aOffersB.length > 0 && (
-                <div>
-                  <p className="section-label">THEY CAN TEACH YOU</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {current.breakdown.aOffersB.map((s) => (
-                      <span key={s} className="rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">{s}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {current.breakdown.bOffersA.length > 0 && (
-                <div>
-                  <p className="section-label">YOU CAN TEACH THEM</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {current.breakdown.bOffersA.map((s) => (
-                      <span key={s} className="rounded-full bg-blue-50 border border-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">{s}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {current.breakdown.sharedGoals.length > 0 && (
-                <div>
-                  <p className="section-label">SHARED GOALS</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {current.breakdown.sharedGoals.map((g) => (
-                      <span key={g} className="rounded-full bg-amber-50 border border-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">{g}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Agenda + cafe */}
-            <div className="px-5 py-4 space-y-2">
-              <button
-                onClick={() => setShowAgenda((v) => !v)}
-                className="flex w-full items-center justify-between rounded-lg border border-[#D4CFC6] bg-brew-offwhite px-4 py-3 text-sm font-medium text-brew-midbrown hover:bg-white transition"
-              >
-                <span>Chat agenda</span>
-                {showAgenda ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-              </button>
-
-              {showAgenda && (
-                <div className="rounded-lg bg-brew-offwhite border border-[#D4CFC6] px-4 py-3 space-y-2">
-                  {current.agenda.map((q, i) => (
-                    <p key={i} className="text-sm text-brew-body">
-                      <span className="font-bold text-brew-accent mr-2">{i + 1}.</span>{q}
-                    </p>
+            {/* ABOUT */}
+            <div className="px-5 pt-5 pb-4 border-b border-[#F0EDE8]">
+              <p className="section-label">ABOUT</p>
+              <p className="text-sm text-brew-body leading-relaxed mt-1">
+                {current.match_reason}
+              </p>
+              {interestTags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {interestTags.map((tag) => (
+                    <span key={tag} className="rounded-full border border-[#D4CFC6] px-3 py-1 text-xs text-brew-midbrown">
+                      {tag}
+                    </span>
                   ))}
-                  <a href={calendarUrl(current)} target="_blank" rel="noopener noreferrer"
-                    className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-white border border-[#D4CFC6] py-2.5 text-sm font-medium text-brew-walnut hover:bg-brew-offwhite transition">
-                    <CalendarDays size={14} /> Add to Google Calendar
-                  </a>
                 </div>
               )}
-
-              {suggestedCafe && (
-                <a href={suggestedCafe.url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2.5 rounded-lg border border-[#D4CFC6] bg-brew-offwhite px-4 py-3 text-sm text-brew-midbrown hover:bg-white transition">
-                  <Coffee size={14} className="text-brew-accent shrink-0" />
-                  <span className="flex-1 truncate font-medium">Meet at {suggestedCafe.name}?</span>
-                  <span className="text-brew-khaki text-xs shrink-0">↗</span>
-                </a>
-              )}
             </div>
+
+            {/* WHY YOU'D VIBE */}
+            <div className="px-5 py-4">
+              <p className="section-label">WHY YOU&apos;D VIBE</p>
+              <div className="mt-2 rounded-lg bg-[#F5F1EB] border-l-4 border-brew-accent px-4 py-3">
+                <p className="text-sm font-lora italic text-brew-body leading-relaxed">
+                  {current.strength.reason}
+                </p>
+              </div>
+            </div>
+
+            {/* Expandable detail */}
+            {showInfo && (
+              <div className="border-t border-[#F0EDE8] px-5 py-4 space-y-3">
+                {current.breakdown.aOffersB.length > 0 && (
+                  <div>
+                    <p className="section-label">THEY CAN TEACH YOU</p>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {current.breakdown.aOffersB.map((s) => (
+                        <span key={s} className="rounded-full bg-[#EFF6F1] border border-[#C9E4D0] px-2.5 py-0.5 text-xs font-medium text-[#3A7A4A]">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {current.breakdown.bOffersA.length > 0 && (
+                  <div>
+                    <p className="section-label">YOU CAN TEACH THEM</p>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {current.breakdown.bOffersA.map((s) => (
+                        <span key={s} className="rounded-full bg-[#EEF2FA] border border-[#C5D3EE] px-2.5 py-0.5 text-xs font-medium text-[#3A5A9B]">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {current.agenda.length > 0 && (
+                  <div>
+                    <p className="section-label">CHAT AGENDA</p>
+                    <div className="rounded-lg bg-brew-offwhite border border-[#D4CFC6] px-4 py-3 space-y-2 mt-1">
+                      {current.agenda.map((q, i) => (
+                        <p key={i} className="text-sm text-brew-body">
+                          <span className="font-bold text-brew-accent mr-2">{i + 1}.</span>{q}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* ── Fixed action buttons ── */}
-      <div className="fixed bottom-0 left-0 right-0 flex gap-3 bg-white border-t border-[#D4CFC6] px-4 py-4 md:absolute">
-        <button onClick={() => swipe("left")}
-          className="flex-1 rounded-lg border-2 border-[#D4CFC6] py-3.5 text-brew-khaki font-semibold text-sm hover:border-red-200 hover:bg-red-50 hover:text-red-500 transition active:scale-95">
-          Pass
+      {/* ── Action buttons ── */}
+      <div className="fixed bottom-16 left-0 right-0 flex items-center justify-center gap-6 px-8 py-4 md:absolute md:bottom-0">
+        {/* Pass */}
+        <button
+          onClick={() => swipe("left")}
+          className="w-16 h-16 rounded-full bg-white card-shadow flex items-center justify-center hover:bg-red-50 active:scale-95 transition border border-[#E8E4DC]"
+        >
+          <X size={28} className="text-brew-khaki" />
         </button>
-        <button onClick={() => swipe("right")}
-          className="flex-[2] rounded-lg bg-brew-walnut py-3.5 font-semibold text-white text-sm hover:bg-brew-body transition active:scale-95">
-          Connect ☕
+
+        {/* Info toggle */}
+        <button
+          onClick={() => setShowInfo((v) => !v)}
+          className="w-12 h-12 rounded-full bg-white card-shadow flex items-center justify-center hover:bg-brew-offwhite active:scale-95 transition border border-[#E8E4DC]"
+        >
+          {showInfo ? <ChevronUp size={20} className="text-brew-khaki" /> : <Info size={20} className="text-brew-khaki" />}
+        </button>
+
+        {/* Connect */}
+        <button
+          onClick={() => swipe("right")}
+          className="w-16 h-16 rounded-full bg-brew-walnut card-shadow flex items-center justify-center hover:bg-brew-body active:scale-95 transition"
+        >
+          <Heart size={28} className="text-white" />
         </button>
       </div>
     </main>

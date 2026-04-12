@@ -46,16 +46,16 @@ export default function SignUpPage() {
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
       {/* Header */}
-      <div className="bg-brew-walnut px-6 pt-14 pb-8">
-        <Link href="/" className="text-white/60 text-sm mb-3 block">← Back</Link>
-        <h1 className="text-2xl font-bold text-white">brew</h1>
-        <p className="mt-1 text-sm text-white/60">find your next coffee chat</p>
+      <div className="bg-brew-walnut px-6 pt-10 pb-5">
+        <Link href="/" className="text-white/50 text-xs mb-3 block">← Back</Link>
+        <h1 className="text-3xl font-rova text-white">brew</h1>
+        <p className="mt-1 text-xs font-lora text-white/50">find your next coffee chat</p>
       </div>
 
       {/* Form */}
       <div className="flex-1 px-6 pt-8 pb-10">
         <h2 className="text-2xl font-bold text-brew-walnut">Create account.</h2>
-        <p className="mt-1 text-sm text-brew-midbrown">Requires a .edu email address.</p>
+        <p className="mt-1 text-sm font-lora text-brew-midbrown">Requires a .edu email address.</p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>

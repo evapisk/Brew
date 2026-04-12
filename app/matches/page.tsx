@@ -69,21 +69,20 @@ export default function MatchesPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
-      {/* ── Green header ── */}
-      <div className="bg-brew-walnut px-6 pt-14 pb-6 shrink-0">
+      {/* ── Header ── */}
+      <div className="bg-brew-walnut px-6 pt-10 pb-5 shrink-0">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-white">brew</h1>
-            <p className="text-xs text-white/50">find your next coffee chat</p>
+            <h1 className="text-3xl font-rova text-white">matches</h1>
+            <p className="text-xs font-lora text-white/50 mt-0.5">
+              {matches.length} connection{matches.length !== 1 ? "s" : ""}
+            </p>
           </div>
           <Link href="/discover"
-            className="rounded-lg bg-white/15 px-3 py-2 text-xs font-semibold text-white hover:bg-white/25 transition">
+            className="rounded-full bg-white/15 px-4 py-2 text-xs font-semibold text-white hover:bg-white/25 transition">
             + Discover
           </Link>
         </div>
-        <p className="mt-3 text-sm font-semibold text-white/80">
-          My Matches <span className="font-normal text-white/40 ml-1">({matches.length})</span>
-        </p>
       </div>
 
       {/* ── List ── */}

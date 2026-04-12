@@ -7,6 +7,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        rova: ["Rova", "system-ui", "sans-serif"],
+        lora: ["Lora", "Georgia", "serif"],
+        raleway: ["Raleway", "system-ui", "sans-serif"],
+        sans: ["Raleway", "system-ui", "sans-serif"],
+      },
       colors: {
         brew: {
           walnut:   "var(--brew-walnut)",

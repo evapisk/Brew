@@ -4,9 +4,9 @@ export default function LandingPage() {
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
       {/* ── Green header band ── */}
-      <div className="bg-brew-walnut px-6 pt-14 pb-8">
-        <h1 className="text-3xl font-bold text-white tracking-tight">brew</h1>
-        <p className="mt-1 text-sm text-white/60">find your next coffee chat</p>
+      <div className="bg-brew-walnut px-6 pt-10 pb-5">
+        <h1 className="text-4xl font-rova text-white tracking-tight">brew</h1>
+        <p className="mt-1 text-xs font-lora text-white/50">find your next coffee chat</p>
       </div>
 
       {/* ── Body ── */}
@@ -14,7 +14,7 @@ export default function LandingPage() {
         <h2 className="text-3xl font-bold text-brew-walnut leading-tight">
           Your next great<br />connection is a<br />coffee away.
         </h2>
-        <p className="mt-3 text-sm text-brew-midbrown leading-relaxed">
+        <p className="mt-3 text-sm font-lora text-brew-midbrown leading-relaxed">
           Skill-swap matching for college students. Connect with someone who has what you need — and needs what you have.
         </p>
 

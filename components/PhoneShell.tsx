@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { BottomNav } from "./BottomNav";
 
-const MAIN_ROUTES = ["/discover", "/matches", "/profile"];
+const MAIN_ROUTES = ["/discover", "/matches", "/messages", "/profile"];
 
 export function PhoneShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();

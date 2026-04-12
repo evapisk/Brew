@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { university, year, goals, skills_offer, skills_want, organizations, favorite_cafes } = body;
+  const { name, major, university, year, goals, skills_offer, skills_want, organizations, favorite_cafes } = body;
 
   if (!university || !year) {
     return NextResponse.json({ error: "University and year are required." }, { status: 400 });
@@ -36,6 +36,8 @@ export async function POST(req: Request) {
   );
 
   const updates: Record<string, unknown> = {
+    ...(name !== undefined && { name }),
+    ...(major !== undefined && { major }),
     university,
     year,
     goals: goals ?? [],
