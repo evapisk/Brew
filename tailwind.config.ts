@@ -7,16 +7,42 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-      },
       colors: {
         brew: {
-          brown:  "#4A2C17",
-          latte:  "#C9A87C",
-          cream:  "#F5EFE6",
-          steam:  "#EAE0D5",
+          walnut:   "var(--brew-walnut)",
+          body:     "var(--brew-body)",
+          midbrown: "var(--brew-midbrown)",
+          khaki:    "var(--brew-khaki)",
+          accent:   "var(--brew-accent)",
+          beige:    "var(--brew-beige)",
+          cream:    "var(--brew-cream)",
+          offwhite: "var(--brew-offwhite)",
+          // legacy
+          brown:    "var(--brew-walnut)",
+          latte:    "var(--brew-accent)",
+          steam:    "var(--brew-offwhite)",
         },
+      },
+      borderRadius: {
+        "4xl": "2rem",
+      },
+      boxShadow: {
+        card:  "0 2px 12px rgba(38,56,39,0.10)",
+        phone: "0 32px 64px rgba(0,0,0,0.5)",
+      },
+      keyframes: {
+        swipe_left: {
+          "0%":   { transform: "translateX(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateX(-150%) rotate(-20deg)", opacity: "0" },
+        },
+        swipe_right: {
+          "0%":   { transform: "translateX(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateX(150%) rotate(20deg)", opacity: "0" },
+        },
+      },
+      animation: {
+        swipe_left:  "swipe_left 0.32s ease-in forwards",
+        swipe_right: "swipe_right 0.32s ease-in forwards",
       },
     },
   },

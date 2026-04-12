@@ -3,33 +3,22 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GOAL_TAGS, SKILL_TAGS } from "@/lib/tags";
+import { X } from "lucide-react";
 
-// Flatten tag lists for display
 const ALL_SKILLS = Object.values(SKILL_TAGS).flat();
-
 type Step = "import" | "goals" | "skills" | "orgs" | "cafes";
 
-interface Cafe {
-  name: string;
-  description: string;
-  url: string;
-}
-
+interface Cafe { name: string; description: string; url: string; }
 interface Profile {
-  university: string;
-  year: number;
-  goals: string[];
-  skills_offer: string[];
-  skills_want: string[];
-  organizations: string[];
-  favorite_cafes: string[];
+  university: string; year: number; goals: string[];
+  skills_offer: string[]; skills_want: string[];
+  organizations: string[]; favorite_cafes: string[];
 }
 
 const YEAR_LABELS: Record<number, string> = {
-  1: "1st year", 2: "2nd year", 3: "3rd year",
-  4: "4th year", 5: "Master's", 6: "PhD",
+  1: "Freshman", 2: "Sophomore", 3: "Junior",
+  4: "Senior", 5: "Master's", 6: "PhD",
 };
-
 const STEPS: Step[] = ["import", "goals", "skills", "orgs", "cafes"];
 
 export default function OnboardingPage() {
@@ -37,82 +26,50 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>("import");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Import fields
   const [profileUrl, setProfileUrl] = useState("");
   const [resumeText, setResumeText] = useState("");
-
-  // Profile fields
   const [profile, setProfile] = useState<Profile>({
-    university: "",
-    year: 1,
-    goals: [],
-    skills_offer: [],
-    skills_want: [],
-    organizations: [],
-    favorite_cafes: [],
+    university: "", year: 1, goals: [],
+    skills_offer: [], skills_want: [], organizations: [], favorite_cafes: [],
   });
-
-  // Org input
   const [orgInput, setOrgInput] = useState("");
-
-  // Cafe step
   const [cafeSuggestions, setCafeSuggestions] = useState<Cafe[]>([]);
   const [cafesLoading, setCafesLoading] = useState(false);
 
-  // Fetch cafes when entering the cafes step
   useEffect(() => {
     if (step !== "cafes" || !profile.university) return;
     setCafesLoading(true);
     fetch(`/api/linkup/cafes?university=${encodeURIComponent(profile.university)}`)
-      .then((r) => r.json())
-      .then((d) => setCafeSuggestions(d.cafes ?? []))
-      .catch(() => {})
-      .finally(() => setCafesLoading(false));
+      .then((r) => r.json()).then((d) => setCafeSuggestions(d.cafes ?? []))
+      .catch(() => {}).finally(() => setCafesLoading(false));
   }, [step, profile.university]);
 
-  // ── Import step ───────────────────────────────────────────────────────────
   async function handleImport() {
-    if (!profileUrl && !resumeText) {
-      setStep("goals");
-      return;
-    }
-    setLoading(true);
-    setError("");
+    if (!profileUrl && !resumeText) { setStep("goals"); return; }
+    setLoading(true); setError("");
     try {
       const res = await fetch("/api/onboard/import", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ profileUrl, resumeText }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Import failed");
-
       setProfile((p) => ({
         ...p,
-        university: data.university ?? p.university,
-        year: data.year ?? p.year,
-        goals: data.goals ?? p.goals,
-        skills_offer: data.skills_offer ?? p.skills_offer,
-        skills_want: data.skills_want ?? p.skills_want,
-        organizations: data.organizations ?? p.organizations,
+        university: data.university ?? p.university, year: data.year ?? p.year,
+        goals: data.goals ?? p.goals, skills_offer: data.skills_offer ?? p.skills_offer,
+        skills_want: data.skills_want ?? p.skills_want, organizations: data.organizations ?? p.organizations,
       }));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Import failed");
-    } finally {
-      setLoading(false);
-      setStep("goals");
-    }
+    } finally { setLoading(false); setStep("goals"); }
   }
 
-  // ── Save & finish ──────────────────────────────────────────────────────────
   async function handleFinish() {
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
       const res = await fetch("/api/onboard/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
       });
       const data = await res.json();
@@ -120,20 +77,13 @@ export default function OnboardingPage() {
       router.push("/discover");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Could not save profile");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
   function toggleTag(field: keyof Pick<Profile, "goals" | "skills_offer" | "skills_want">, tag: string) {
     setProfile((p) => {
-      const current = p[field];
-      return {
-        ...p,
-        [field]: current.includes(tag)
-          ? current.filter((t) => t !== tag)
-          : [...current, tag],
-      };
+      const cur = p[field];
+      return { ...p, [field]: cur.includes(tag) ? cur.filter((t) => t !== tag) : [...cur, tag] };
     });
   }
 
@@ -148,337 +98,235 @@ export default function OnboardingPage() {
 
   function addOrg() {
     const org = orgInput.trim();
-    if (org && !profile.organizations.includes(org)) {
+    if (org && !profile.organizations.includes(org))
       setProfile((p) => ({ ...p, organizations: [...p.organizations, org] }));
-    }
     setOrgInput("");
   }
 
-  function removeOrg(org: string) {
-    setProfile((p) => ({ ...p, organizations: p.organizations.filter((o) => o !== org) }));
-  }
-
   const stepIndex = STEPS.indexOf(step);
+  const stepTitles: Record<Step, { h: string; sub: string }> = {
+    import: { h: "Hey there.", sub: "Tell us a bit about yourself so we can find your best matches." },
+    goals:  { h: "What are you working toward?", sub: "Pick up to 5 goals — these drive your matches." },
+    skills: { h: "Skill swap.", sub: "What can you teach? What do you want to learn?" },
+    orgs:   { h: "Clubs & organizations.", sub: "Helps us avoid matching people who already know each other." },
+    cafes:  { h: "Favorite spots ☕", sub: "Pick 1–2 go-to cafes near campus for meetups." },
+  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center px-6 py-10">
-      <div className="w-full max-w-lg">
-        {/* Progress bar */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-brew-brown/50 uppercase tracking-widest">
-              Step {stepIndex + 1} of {STEPS.length}
-            </span>
-            <span className="text-xs text-brew-brown/40">brew</span>
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-brew-brown/10">
-            <div
-              className="h-1.5 rounded-full bg-brew-latte transition-all duration-500"
-              style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
-            />
-          </div>
+    <main className="flex min-h-screen flex-col bg-brew-offwhite">
+      {/* ── Green header ── */}
+      <div className="bg-brew-walnut px-6 pt-14 pb-6 shrink-0">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-white font-bold text-lg">brew</span>
+          <span className="text-white/50 text-xs">{stepIndex + 1} / {STEPS.length}</span>
         </div>
+        {/* Progress bar */}
+        <div className="h-1 w-full rounded-full bg-white/20">
+          <div
+            className="h-1 rounded-full bg-white transition-all duration-500"
+            style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* ── Scrollable content ── */}
+      <div className="flex-1 overflow-y-auto px-6 pt-6 pb-32">
+        <h2 className="text-2xl font-bold text-brew-walnut">{stepTitles[step].h}</h2>
+        <p className="mt-1 mb-6 text-sm text-brew-midbrown">{stepTitles[step].sub}</p>
 
         {/* ── STEP 1: Import ── */}
         {step === "import" && (
-          <div className="flex flex-col gap-6">
+          <div className="space-y-5">
             <div>
-              <h2 className="text-2xl font-bold text-brew-brown">Let&apos;s build your profile</h2>
-              <p className="mt-1 text-brew-brown/60">
-                Drop a profile URL or paste your resume — we&apos;ll pre-fill everything with AI.
-              </p>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-brew-brown/80">
-                Profile URL <span className="text-brew-brown/30">(LinkedIn, GitHub, portfolio — optional)</span>
-              </label>
+              <p className="section-label">PROFILE URL</p>
               <input
-                type="url"
-                value={profileUrl}
+                type="url" value={profileUrl}
                 onChange={(e) => setProfileUrl(e.target.value)}
-                placeholder="https://linkedin.com/in/yourname or github.com/you"
-                className="w-full rounded-xl border border-brew-brown/20 bg-white px-4 py-3 text-brew-brown placeholder-brew-brown/30 outline-none focus:border-brew-latte focus:ring-2 focus:ring-brew-latte/20"
+                placeholder="linkedin.com/in/you or github.com/you"
+                className="brew-input"
               />
+              <p className="mt-1 text-xs text-brew-khaki">LinkedIn, GitHub, or portfolio — optional</p>
             </div>
-
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-brew-brown/80">
-                Or paste your resume / bio <span className="text-brew-brown/30">(optional)</span>
-              </label>
+              <p className="section-label">OR PASTE YOUR RESUME / BIO</p>
               <textarea
-                rows={5}
-                value={resumeText}
+                rows={5} value={resumeText}
                 onChange={(e) => setResumeText(e.target.value)}
                 placeholder="Paste plain text from your resume..."
-                className="w-full rounded-xl border border-brew-brown/20 bg-white px-4 py-3 text-brew-brown placeholder-brew-brown/30 outline-none focus:border-brew-latte focus:ring-2 focus:ring-brew-latte/20 resize-none"
+                className="brew-input resize-none"
               />
             </div>
-
-            {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
-
-            <button
-              onClick={handleImport}
-              disabled={loading}
-              className="rounded-2xl bg-brew-brown py-4 font-semibold text-brew-cream shadow-md transition hover:bg-brew-brown/90 disabled:opacity-50"
-            >
-              {loading ? "Analyzing with AI…" : profileUrl || resumeText ? "Auto-fill my profile →" : "Skip, I'll fill it in →"}
-            </button>
+            {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
           </div>
         )}
 
         {/* ── STEP 2: Goals ── */}
         {step === "goals" && (
-          <div className="flex flex-col gap-6">
+          <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-brew-brown">What are you working toward?</h2>
-              <p className="mt-1 text-brew-brown/60">Pick up to 5. These drive your matches.</p>
-            </div>
-
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label className="mb-1 block text-xs font-medium text-brew-brown/60 uppercase tracking-widest">University</label>
-                <input
-                  type="text"
-                  required
-                  value={profile.university}
-                  onChange={(e) => setProfile((p) => ({ ...p, university: e.target.value }))}
-                  placeholder="NYU"
-                  className="w-full rounded-xl border border-brew-brown/20 bg-white px-3 py-2.5 text-sm text-brew-brown outline-none focus:border-brew-latte"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-brew-brown/60 uppercase tracking-widest">Year</label>
-                <select
-                  value={profile.year}
-                  onChange={(e) => setProfile((p) => ({ ...p, year: Number(e.target.value) }))}
-                  className="rounded-xl border border-brew-brown/20 bg-white px-3 py-2.5 text-sm text-brew-brown outline-none focus:border-brew-latte"
-                >
-                  {[1, 2, 3, 4, 5, 6].map((y) => (
-                    <option key={y} value={y}>{YEAR_LABELS[y]}</option>
-                  ))}
-                </select>
+              <p className="section-label">YOUR DETAILS</p>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <p className="section-label">SCHOOL</p>
+                  <input
+                    type="text" required value={profile.university}
+                    onChange={(e) => setProfile((p) => ({ ...p, university: e.target.value }))}
+                    placeholder="e.g. NYU"
+                    className="brew-input"
+                  />
+                </div>
+                <div className="w-32">
+                  <p className="section-label">YEAR</p>
+                  <select
+                    value={profile.year}
+                    onChange={(e) => setProfile((p) => ({ ...p, year: Number(e.target.value) }))}
+                    className="brew-input"
+                  >
+                    {[1,2,3,4,5,6].map((y) => (
+                      <option key={y} value={y}>{YEAR_LABELS[y]}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
             {Object.entries(GOAL_TAGS).map(([category, tags]) => (
               <div key={category}>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-brew-brown/40">{category}</p>
+                <p className="section-label">{category.toUpperCase()}</p>
                 <div className="flex flex-wrap gap-2">
                   {(tags as string[]).map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => toggleTag("goals", tag)}
-                      className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                        profile.goals.includes(tag)
-                          ? "bg-brew-brown text-brew-cream"
-                          : "bg-white text-brew-brown/70 border border-brew-brown/20 hover:border-brew-latte"
-                      }`}
-                    >
+                    <button key={tag} onClick={() => toggleTag("goals", tag)}
+                      className={`tag-pill ${profile.goals.includes(tag) ? "tag-pill-active" : "tag-pill-inactive"}`}>
                       {tag}
                     </button>
                   ))}
                 </div>
               </div>
             ))}
-
-            <button
-              onClick={() => setStep("skills")}
-              disabled={profile.goals.length === 0 || !profile.university}
-              className="rounded-2xl bg-brew-brown py-4 font-semibold text-brew-cream shadow-md transition hover:bg-brew-brown/90 disabled:opacity-50"
-            >
-              Next →
-            </button>
           </div>
         )}
 
         {/* ── STEP 3: Skills ── */}
         {step === "skills" && (
-          <div className="flex flex-col gap-6">
+          <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-brew-brown">Skill swap</h2>
-              <p className="mt-1 text-brew-brown/60">
-                What can you teach? What do you want to learn?
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-sm font-semibold text-brew-brown">I can teach / offer</p>
+              <p className="section-label">I CAN TEACH / OFFER</p>
               <div className="flex flex-wrap gap-2">
                 {ALL_SKILLS.map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => toggleTag("skills_offer", tag)}
-                    className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                      profile.skills_offer.includes(tag)
-                        ? "bg-brew-latte text-brew-brown"
-                        : "bg-white text-brew-brown/70 border border-brew-brown/20 hover:border-brew-latte"
-                    }`}
-                  >
+                  <button key={tag} onClick={() => toggleTag("skills_offer", tag)}
+                    className={`tag-pill ${profile.skills_offer.includes(tag) ? "bg-[#7A4A2A] text-white border-transparent" : "tag-pill-inactive"}`}>
                     {tag}
                   </button>
                 ))}
               </div>
             </div>
-
             <div>
-              <p className="mb-2 text-sm font-semibold text-brew-brown">I want to learn</p>
+              <p className="section-label">I WANT TO LEARN</p>
               <div className="flex flex-wrap gap-2">
                 {ALL_SKILLS.map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => toggleTag("skills_want", tag)}
-                    className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                      profile.skills_want.includes(tag)
-                        ? "bg-brew-brown text-brew-cream"
-                        : "bg-white text-brew-brown/70 border border-brew-brown/20 hover:border-brew-latte"
-                    }`}
-                  >
+                  <button key={tag} onClick={() => toggleTag("skills_want", tag)}
+                    className={`tag-pill ${profile.skills_want.includes(tag) ? "bg-[#4A6B9B] text-white border-transparent" : "tag-pill-inactive"}`}>
                     {tag}
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setStep("goals")}
-                className="flex-1 rounded-2xl border-2 border-brew-brown/20 py-4 font-semibold text-brew-brown transition hover:bg-white/60"
-              >
-                ← Back
-              </button>
-              <button
-                onClick={() => setStep("orgs")}
-                disabled={profile.skills_offer.length === 0 && profile.skills_want.length === 0}
-                className="flex-[2] rounded-2xl bg-brew-brown py-4 font-semibold text-brew-cream shadow-md transition hover:bg-brew-brown/90 disabled:opacity-50"
-              >
-                Next →
-              </button>
             </div>
           </div>
         )}
 
         {/* ── STEP 4: Orgs ── */}
         {step === "orgs" && (
-          <div className="flex flex-col gap-6">
-            <div>
-              <h2 className="text-2xl font-bold text-brew-brown">Clubs & organizations</h2>
-              <p className="mt-1 text-brew-brown/60">
-                We use this to avoid matching people who already know each other well.
-              </p>
-            </div>
-
+          <div className="space-y-4">
             <div className="flex gap-2">
               <input
-                type="text"
-                value={orgInput}
+                type="text" value={orgInput}
                 onChange={(e) => setOrgInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addOrg())}
-                placeholder="e.g. Finance Club, Hackathon Team..."
-                className="flex-1 rounded-xl border border-brew-brown/20 bg-white px-4 py-3 text-brew-brown placeholder-brew-brown/30 outline-none focus:border-brew-latte"
+                placeholder="e.g. Finance Club, Hackathon Team…"
+                className="brew-input flex-1"
               />
-              <button
-                onClick={addOrg}
-                className="rounded-xl bg-brew-brown px-4 py-3 text-sm font-semibold text-brew-cream hover:bg-brew-brown/90"
-              >
+              <button onClick={addOrg}
+                className="rounded-lg bg-brew-walnut px-4 text-white text-sm font-semibold hover:bg-brew-body transition shrink-0">
                 Add
               </button>
             </div>
-
             {profile.organizations.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {profile.organizations.map((org) => (
-                  <span key={org} className="flex items-center gap-1.5 rounded-full bg-brew-steam px-3 py-1.5 text-sm text-brew-brown">
+                  <span key={org} className="flex items-center gap-1.5 rounded-full bg-white border border-[#D4CFC6] px-3 py-1.5 text-sm text-brew-body">
                     {org}
-                    <button onClick={() => removeOrg(org)} className="text-brew-brown/40 hover:text-brew-brown">×</button>
+                    <button onClick={() => setProfile((p) => ({ ...p, organizations: p.organizations.filter((o) => o !== org) }))}
+                      className="text-brew-khaki hover:text-brew-walnut transition">
+                      <X size={12} />
+                    </button>
                   </span>
                 ))}
               </div>
             )}
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setStep("skills")}
-                className="flex-1 rounded-2xl border-2 border-brew-brown/20 py-4 font-semibold text-brew-brown transition hover:bg-white/60"
-              >
-                ← Back
-              </button>
-              <button
-                onClick={() => setStep("cafes")}
-                className="flex-[2] rounded-2xl bg-brew-brown py-4 font-semibold text-brew-cream shadow-md transition hover:bg-brew-brown/90"
-              >
-                Next →
-              </button>
-            </div>
           </div>
         )}
 
         {/* ── STEP 5: Cafes ── */}
         {step === "cafes" && (
-          <div className="flex flex-col gap-6">
-            <div>
-              <h2 className="text-2xl font-bold text-brew-brown">Favorite spots ☕</h2>
-              <p className="mt-1 text-brew-brown/60">
-                Pick 1–2 go-to cafes near campus. We&apos;ll suggest meetup spots your match will love too.
-              </p>
-            </div>
-
+          <div className="space-y-3">
             {cafesLoading && (
-              <div className="flex items-center gap-2 text-sm text-brew-brown/50 animate-pulse">
-                <span>Finding cafes near {profile.university}…</span>
-              </div>
+              <p className="animate-pulse text-sm text-brew-khaki py-4">Finding cafes near {profile.university}…</p>
             )}
-
-            {!cafesLoading && cafeSuggestions.length > 0 && (
-              <div className="flex flex-col gap-3">
-                {cafeSuggestions.map((cafe) => (
-                  <button
-                    key={cafe.name}
-                    onClick={() => toggleCafe(cafe.name)}
-                    className={`rounded-2xl border-2 p-4 text-left transition ${
-                      profile.favorite_cafes.includes(cafe.name)
-                        ? "border-brew-brown bg-brew-steam"
-                        : "border-brew-brown/15 bg-white hover:border-brew-latte"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-brew-brown">{cafe.name}</p>
-                        <p className="mt-0.5 text-xs text-brew-brown/50 line-clamp-2">{cafe.description}</p>
-                      </div>
-                      <span className={`mt-0.5 shrink-0 text-lg ${profile.favorite_cafes.includes(cafe.name) ? "opacity-100" : "opacity-20"}`}>
-                        ✓
-                      </span>
+            {!cafesLoading && cafeSuggestions.map((cafe) => {
+              const sel = profile.favorite_cafes.includes(cafe.name);
+              return (
+                <button key={cafe.name} onClick={() => toggleCafe(cafe.name)}
+                  className={`w-full rounded-lg border p-4 text-left transition ${
+                    sel ? "border-brew-walnut bg-white" : "border-[#D4CFC6] bg-white hover:border-brew-walnut/50"
+                  }`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-brew-walnut text-sm">{cafe.name}</p>
+                      <p className="mt-0.5 text-xs text-brew-khaki line-clamp-2">{cafe.description}</p>
                     </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
+                    <div className={`shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      sel ? "border-brew-walnut bg-brew-walnut" : "border-[#D4CFC6]"
+                    }`}>
+                      {sel && <span className="text-white text-[10px] font-bold">✓</span>}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
             {!cafesLoading && cafeSuggestions.length === 0 && (
-              <p className="rounded-xl bg-brew-steam px-4 py-3 text-sm text-brew-brown/60">
-                No cafe data available — you can add favorites later from your profile.
+              <p className="rounded-lg bg-white border border-[#D4CFC6] px-4 py-3 text-sm text-brew-khaki">
+                No cafes found — you can skip this and update later.
               </p>
             )}
-
-            {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setStep("orgs")}
-                className="flex-1 rounded-2xl border-2 border-brew-brown/20 py-4 font-semibold text-brew-brown transition hover:bg-white/60"
-              >
-                ← Back
-              </button>
-              <button
-                onClick={handleFinish}
-                disabled={loading}
-                className="flex-[2] rounded-2xl bg-brew-brown py-4 font-semibold text-brew-cream shadow-md transition hover:bg-brew-brown/90 disabled:opacity-50"
-              >
-                {loading ? "Saving…" : "Find My Matches ☕"}
-              </button>
-            </div>
+            {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
           </div>
+        )}
+      </div>
+
+      {/* ── Sticky CTA ── */}
+      <div className="sticky bottom-0 bg-brew-offwhite border-t border-[#D4CFC6] px-6 py-4 shrink-0">
+        {step === "import" && (
+          <button onClick={handleImport} disabled={loading} className="btn-primary">
+            {loading ? "Analyzing with AI…" : (profileUrl || resumeText) ? "Auto-fill my profile →" : "Skip, fill it in manually →"}
+          </button>
+        )}
+        {step === "goals" && (
+          <button onClick={() => setStep("skills")} disabled={!profile.university || profile.goals.length === 0} className="btn-primary">
+            Next →
+          </button>
+        )}
+        {step === "skills" && (
+          <button onClick={() => setStep("orgs")} disabled={profile.skills_offer.length === 0 && profile.skills_want.length === 0} className="btn-primary">
+            Next →
+          </button>
+        )}
+        {step === "orgs" && (
+          <button onClick={() => setStep("cafes")} className="btn-primary">Next →</button>
+        )}
+        {step === "cafes" && (
+          <button onClick={handleFinish} disabled={loading} className="btn-primary">
+            {loading ? "Saving…" : "Find my matches"}
+          </button>
         )}
       </div>
     </main>

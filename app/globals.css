@@ -3,18 +3,121 @@
 @tailwind utilities;
 
 :root {
-  --brew-brown: #4A2C17;
-  --brew-latte: #C9A87C;
-  --brew-cream: #F5EFE6;
-  --brew-steam: #EAE0D5;
+  /* ── Brew color system (forest green + warm parchment) ── */
+  --brew-walnut:   #3D1F0D;   /* dark walnut brown — headings, primary buttons, nav */
+  --brew-body:     #4A2C17;   /* warm dark brown for body text */
+  --brew-midbrown: #7A4A2A;   /* medium warm brown — secondary text */
+  --brew-khaki:    #9B7350;   /* warm khaki — placeholders, tertiary */
+  --brew-accent:   #9B6A3C;   /* warm amber — section labels, highlights */
+  --brew-beige:    #C4A882;   /* warm tan — borders, dividers */
+  --brew-cream:    #FFFFFF;   /* white — card / input backgrounds */
+  --brew-offwhite: #E8E4DC;   /* warm parchment — page background */
+
+  /* legacy aliases */
+  --brew-brown: var(--brew-walnut);
+  --brew-latte: var(--brew-accent);
+  --brew-steam: var(--brew-offwhite);
+}
+
+/* ── Base ──────────────────────────────────────────────── */
+html {
+  background: #1A0A04;
 }
 
 body {
-  background-color: var(--brew-cream);
-  color: var(--brew-brown);
+  background-color: var(--brew-offwhite);
+  color: var(--brew-body);
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Card swipe shadow */
+/* ── Hide scrollbars (phone-app feel) ─────────────────── */
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
+
+/* ── Card shadow ───────────────────────────────────────── */
 .card-shadow {
-  box-shadow: 0 8px 32px rgba(74, 44, 23, 0.12);
+  box-shadow: 0 2px 12px rgba(38, 56, 39, 0.10);
+}
+
+/* ── Tag pills ─────────────────────────────────────────── */
+.tag-pill {
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+.tag-pill-active {
+  background-color: var(--brew-walnut);
+  color: #fff;
+}
+.tag-pill-inactive {
+  background-color: #fff;
+  color: var(--brew-midbrown);
+  border-color: #D4CFC6;
+}
+.tag-pill-inactive:hover {
+  border-color: var(--brew-accent);
+  color: var(--brew-accent);
+}
+
+/* ── Brew input ────────────────────────────────────────── */
+.brew-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #D4CFC6;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--brew-body);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.brew-input::placeholder {
+  color: #AAA49A;
+}
+.brew-input:focus {
+  border-color: var(--brew-walnut);
+}
+
+/* ── Section label ─────────────────────────────────────── */
+.section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brew-accent);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Primary button ────────────────────────────────────── */
+.btn-primary {
+  width: 100%;
+  background: var(--brew-walnut);
+  color: #fff;
+  font-weight: 600;
+  padding: 1rem;
+  border-radius: 10px;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-primary:hover { background: var(--brew-body); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.5; }
+
+/* ── Secondary button ──────────────────────────────────── */
+.btn-secondary {
+  width: 100%;
+  background: transparent;
+  color: var(--brew-walnut);
+  font-weight: 500;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1.5px solid #D4CFC6;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-secondary:hover {
+  background: #fff;
+  border-color: var(--brew-walnut);
 }

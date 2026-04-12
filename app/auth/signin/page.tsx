@@ -16,24 +16,15 @@ export default function SignInPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      // Sign in client-side so Supabase sets the session cookie in the browser
       const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
-
       const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
       if (authError) throw new Error(authError.message);
-
-      // Check onboarding status
       const { data: profile } = await supabase
-        .from("users")
-        .select("onboarded")
-        .eq("auth_id", data.user.id)
-        .single();
-
+        .from("users").select("onboarded").eq("auth_id", data.user.id).single();
       router.push(profile?.onboarded ? "/discover" : "/onboarding");
       router.refresh();
     } catch (err: unknown) {
@@ -44,57 +35,58 @@ export default function SignInPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <Link href="/" className="mb-8 flex items-center gap-2">
-          <span className="text-2xl">☕</span>
-          <span className="text-xl font-bold text-brew-brown">brew</span>
-        </Link>
+    <main className="flex min-h-screen flex-col bg-brew-offwhite">
+      {/* Header */}
+      <div className="bg-brew-walnut px-6 pt-14 pb-8">
+        <Link href="/" className="text-white/60 text-sm mb-3 block">← Back</Link>
+        <h1 className="text-2xl font-bold text-white">brew</h1>
+        <p className="mt-1 text-sm text-white/60">find your next coffee chat</p>
+      </div>
 
-        <h2 className="mb-1 text-2xl font-bold text-brew-brown">Welcome back</h2>
-        <p className="mb-8 text-sm text-brew-brown/60">Sign in to find your next match</p>
+      {/* Form */}
+      <div className="flex-1 px-6 pt-8 pb-10">
+        <h2 className="text-2xl font-bold text-brew-walnut">Welcome back.</h2>
+        <p className="mt-1 text-sm text-brew-midbrown">Sign in to find your next match.</p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-brew-brown/80">Email</label>
+            <p className="section-label">EMAIL</p>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="alex@university.edu"
-              className="w-full rounded-xl border border-brew-brown/20 bg-white px-4 py-3 text-brew-brown placeholder-brew-brown/30 outline-none focus:border-brew-latte focus:ring-2 focus:ring-brew-latte/20"
+              className="brew-input"
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-brew-brown/80">Password</label>
+            <p className="section-label">PASSWORD</p>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-xl border border-brew-brown/20 bg-white px-4 py-3 text-brew-brown placeholder-brew-brown/30 outline-none focus:border-brew-latte focus:ring-2 focus:ring-brew-latte/20"
+              className="brew-input"
             />
           </div>
 
           {error && (
-            <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
+            <p className="rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">{error}</p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-2 rounded-2xl bg-brew-brown py-4 font-semibold text-brew-cream shadow-md transition hover:bg-brew-brown/90 disabled:opacity-50 active:scale-95"
-          >
-            {loading ? "Signing in…" : "Sign In"}
-          </button>
+          <div className="pt-2">
+            <button type="submit" disabled={loading} className="btn-primary">
+              {loading ? "Signing in…" : "Sign in"}
+            </button>
+          </div>
         </form>
 
-        <p className="mt-6 text-center text-sm text-brew-brown/60">
+        <p className="mt-6 text-center text-sm text-brew-khaki">
           No account?{" "}
-          <Link href="/auth/signup" className="font-medium text-brew-brown underline">
+          <Link href="/auth/signup" className="font-semibold text-brew-walnut underline-offset-2 hover:underline">
             Sign up
           </Link>
         </p>

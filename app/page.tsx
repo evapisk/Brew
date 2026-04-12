@@ -2,42 +2,54 @@ import Link from "next/link";
 
 export default function LandingPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      {/* Logo */}
-      <div className="mb-8 flex items-center gap-3">
-        <span className="text-5xl">☕</span>
-        <h1 className="text-5xl font-bold tracking-tight text-brew-brown">brew</h1>
+    <main className="flex min-h-screen flex-col bg-brew-offwhite">
+      {/* ── Green header band ── */}
+      <div className="bg-brew-walnut px-6 pt-14 pb-8">
+        <h1 className="text-3xl font-bold text-white tracking-tight">brew</h1>
+        <p className="mt-1 text-sm text-white/60">find your next coffee chat</p>
       </div>
 
-      {/* Tagline */}
-      <p className="mb-3 text-xl font-medium text-brew-brown/80">
-        Corporate Hinge for college students.
-      </p>
-      <p className="mb-10 max-w-sm text-brew-brown/60">
-        Skill-swap matching that connects you with someone who has what you need —
-        and needs what you have.
-      </p>
+      {/* ── Body ── */}
+      <div className="flex flex-1 flex-col px-6 pt-8 pb-10">
+        <h2 className="text-3xl font-bold text-brew-walnut leading-tight">
+          Your next great<br />connection is a<br />coffee away.
+        </h2>
+        <p className="mt-3 text-sm text-brew-midbrown leading-relaxed">
+          Skill-swap matching for college students. Connect with someone who has what you need — and needs what you have.
+        </p>
 
-      {/* CTA buttons */}
-      <div className="flex w-full max-w-xs flex-col gap-3">
-        <Link
-          href="/auth/signup"
-          className="rounded-2xl bg-brew-brown px-6 py-4 text-center font-semibold text-brew-cream shadow-md transition hover:bg-brew-brown/90 active:scale-95"
-        >
-          Get Started
-        </Link>
-        <Link
-          href="/auth/signin"
-          className="rounded-2xl border-2 border-brew-brown/20 bg-white/60 px-6 py-4 text-center font-semibold text-brew-brown transition hover:bg-white/90 active:scale-95"
-        >
-          Sign In
-        </Link>
+        {/* Feature list */}
+        <div className="mt-8 space-y-3">
+          {[
+            ["AI-powered matching", "Paired on skills + goals"],
+            ["Skill swap", "Teach what you know, learn what you don't"],
+            ["Coffee agenda", "3 convo starters generated for you"],
+            ["Cafe finder", "Suggested meetup spots near campus"],
+          ].map(([title, sub]) => (
+            <div key={title} className="flex items-start gap-3 rounded-lg bg-white px-4 py-3 card-shadow">
+              <div className="mt-0.5 w-2 h-2 rounded-full bg-brew-walnut shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-brew-walnut">{title}</p>
+                <p className="text-xs text-brew-khaki">{sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTAs */}
+        <div className="mt-10 space-y-3">
+          <Link href="/auth/signup" className="btn-primary block text-center">
+            Get started
+          </Link>
+          <Link href="/auth/signin" className="btn-secondary block text-center">
+            Sign in
+          </Link>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-brew-khaki">
+          .edu email required · Real students only
+        </p>
       </div>
-
-      {/* Fine print */}
-      <p className="mt-10 text-xs text-brew-brown/40">
-        .edu email required · Only your campus, only real students
-      </p>
     </main>
   );
 }
