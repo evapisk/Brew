@@ -14,3 +14,25 @@ features: ai matching, info on people using linkup (reach feature)
 
 target: students in general, building early connections to grow 
         open to everyone, mentors looking for mentees too
+
+
+Tiered Feature List🟢 Must-Have (demo lives or dies on these)
+
+Quick onboarding — paste LinkedIn URL or resume → AI populates goals, skills, clubs automatically (editable after)
+AI-generated goals — pre-fill from resume, user edits/confirms (low friction)
+Skill-swap matching — surface people with complementary skills + similar goals, not just similar people
+AI blurb pre-match — before you swipe, Claude explains the potential match ("She's a designer, you're an engineer — you've both listed 'launch a startup' as a goal")
+Swipe UI — right to connect, left to pass
+Match screen — post-match blurb + 3 convo starters
+🟡 Strong-to-Have (include if Person 3 has bandwidth)
+
+Favorite café selection — during onboarding, pick 1-2 go-to spots; on match, surface overlap or suggest via Linkup
+Calendar connect — a button that generates a Google Cal link (even a pre-filled URL is fine, doesn't need to be live integration)
+Linkup for café data — use it to pull real NYC café info, not hardcoded
+🔴 Cut for Demo (pitch as roadmap)
+
+Feedback loop / algorithm improvement
+Mentor/mentee mode
+In-app chat (show a static screen)
+Real network graph visualization
+Clubs auto-detection (mention it works, fake it in demo data)
