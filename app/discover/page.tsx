@@ -122,7 +122,7 @@ export default function DiscoverPage() {
   const interestTags = [...current.breakdown.sharedGoals, ...current.breakdown.aOffersB].slice(0, 6);
 
   return (
-    <main className="flex min-h-screen flex-col bg-brew-offwhite md:h-full">
+    <main className="flex flex-col bg-brew-offwhite min-h-screen">
       {/* ── Video header ── */}
       <div className="relative shrink-0 overflow-hidden" style={{ minHeight: 116 }}>
         <video
@@ -168,7 +168,7 @@ export default function DiscoverPage() {
       </div>
 
       {/* ── Card ── */}
-      <div className="flex-1 px-4 pt-5 pb-4 overflow-y-auto scroll-smooth-ios">
+      <div className="px-4 pt-5 pb-2">
         <div
           ref={cardRef}
           className={cardAnim}
@@ -318,7 +318,7 @@ export default function DiscoverPage() {
       </div>
 
       {/* ── Action buttons ── */}
-      <div className="shrink-0 flex items-center justify-center gap-5 px-8 pt-3 pb-24">
+      <div className="flex items-center justify-center gap-5 px-8 pt-4 pb-28">
         {/* Pass */}
         <button
           onClick={() => swipe("left")}
