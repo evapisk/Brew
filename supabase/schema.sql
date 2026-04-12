@@ -61,13 +61,13 @@ create table public.matches (
                     check (status in ('pending', 'accepted', 'declined', 'completed')),
   created_at      timestamptz not null default now(),
 
-  -- prevent duplicate pairs regardless of order
-  constraint no_self_match check (user_a_id <> user_b_id),
-  constraint unique_pair unique (
-    least(user_a_id, user_b_id),
-    greatest(user_a_id, user_b_id)
-  )
+  -- prevent self-match
+  constraint no_self_match check (user_a_id <> user_b_id)
 );
+
+-- prevent duplicate pairs regardless of order (A,B) == (B,A)
+create unique index unique_match_pair
+  on public.matches (least(user_a_id, user_b_id), greatest(user_a_id, user_b_id));
 
 create index matches_user_a_idx on public.matches(user_a_id);
 create index matches_user_b_idx on public.matches(user_b_id);
