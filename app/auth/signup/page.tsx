@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
@@ -43,19 +44,22 @@ export default function SignUpPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
-      <div className="brew-header px-6 pt-10 pb-6">
+      <div className="relative brew-header px-6 pt-10 pb-6 overflow-hidden">
         <Link href="/" className="text-white/40 text-xs mb-4 block font-medium tracking-wide hover:text-white/70 transition-colors">
           ← Back
         </Link>
         <h1 className="text-3xl font-rova text-white animate-fade-in" style={{ letterSpacing: "-0.01em" }}>brew</h1>
-        <p className="mt-1 text-xs font-lora text-white/50 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          find your next coffee chat
+        <p className="mt-1 text-xs text-white/50 animate-fade-in" style={{ fontFamily: "var(--font-playfair)", animationDelay: "0.1s" }}>
+          helping each other on campus
         </p>
+        <div className="absolute right-0 bottom-0 pointer-events-none">
+          <Image src="/coffee-landing.png" alt="" width={110} height={110} style={{ mixBlendMode: "screen" }} />
+        </div>
       </div>
 
       <div className="flex-1 px-6 pt-8 pb-10 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
         <h2 className="text-2xl font-bold text-brew-walnut" style={{ letterSpacing: "-0.02em" }}>Create account.</h2>
-        <p className="mt-1 text-sm font-lora text-brew-midbrown">Requires a .edu email address.</p>
+        <p className="mt-1 text-sm font-playfair text-brew-midbrown">Requires a .edu email address.</p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
@@ -87,7 +91,7 @@ export default function SignUpPage() {
           )}
 
           <div className="pt-1">
-            <button type="submit" disabled={loading} className="btn-pill">
+            <button type="submit" disabled={loading} className="btn-pill" style={{ fontFamily: "var(--font-playfair)" }}>
               {loading ? "Creating account…" : "Continue"}
             </button>
           </div>

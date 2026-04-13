@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import { LogOut, Check, X, Plus } from "lucide-react";
@@ -169,11 +170,14 @@ export default function ProfilePage() {
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
       {/* Header */}
-      <div className="brew-header px-6 pt-14 pb-5 shrink-0">
+      <div className="relative brew-header px-6 pt-10 pb-5 shrink-0 overflow-hidden">
         <h1 className="text-3xl font-rova text-white animate-fade-in" style={{ letterSpacing: "-0.01em" }}>profile</h1>
-        <p className="text-xs font-lora text-white/50 mt-0.5 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          your account
+        <p className="text-xs font-playfair text-white/50 mt-0.5 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          helping each other on campus
         </p>
+        <div className="absolute right-0 bottom-0 pointer-events-none">
+          <Image src="/coffee-landing.png" alt="" width={110} height={110} style={{ mixBlendMode: "screen" }} />
+        </div>
       </div>
 
       {loading ? (

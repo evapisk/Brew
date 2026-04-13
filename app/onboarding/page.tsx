@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { X, Plus } from "lucide-react";
 import { GOAL_TAGS, SKILL_TAGS } from "@/lib/tags";
@@ -158,15 +159,18 @@ export default function OnboardingPage() {
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
       {/* Header */}
-      <div className="brew-header px-6 pt-10 pb-5 shrink-0">
+      <div className="relative brew-header px-6 pt-10 pb-5 shrink-0 overflow-hidden">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-rova text-white animate-fade-in" style={{ letterSpacing: "-0.01em" }}>brew</h1>
-            <p className="text-xs font-lora text-white/50 mt-0.5 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              {step === "upload" ? "let's set up your profile" : "review your profile"}
+            <p className="text-xs font-playfair text-white/50 mt-0.5 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+              helping each other on campus
             </p>
           </div>
-          <span className="text-white/40 text-xs">{step === "upload" ? "1" : "2"} / 2</span>
+          <span className="text-white/40 text-xs mr-24">{step === "upload" ? "1" : "2"} / 2</span>
+        </div>
+        <div className="absolute right-0 bottom-0 pointer-events-none">
+          <Image src="/coffee-landing.png" alt="" width={110} height={110} style={{ mixBlendMode: "screen" }} />
         </div>
         <div className="mt-3 h-1 w-full rounded-full bg-white/20">
           <div className="h-1 rounded-full bg-white/70 transition-all duration-500" style={{ width: step === "upload" ? "50%" : "100%" }} />
@@ -180,7 +184,7 @@ export default function OnboardingPage() {
           <>
             <div className="animate-fade-in-up">
               <h2 className="text-2xl font-bold text-brew-walnut" style={{ letterSpacing: "-0.01em" }}>Hey there.</h2>
-              <p className="mt-1 text-sm font-lora text-brew-midbrown">
+              <p className="mt-1 text-sm font-playfair text-brew-midbrown">
                 Upload your resume and describe your goals — we&apos;ll build your profile automatically.
               </p>
             </div>
@@ -227,7 +231,7 @@ export default function OnboardingPage() {
           <>
             <div className="animate-fade-in-up">
               <h2 className="text-2xl font-bold text-brew-walnut" style={{ letterSpacing: "-0.01em" }}>Here&apos;s your profile.</h2>
-              <p className="mt-1 text-sm font-lora text-brew-midbrown">
+              <p className="mt-1 text-sm font-playfair text-brew-midbrown">
                 We built this from your resume and goals. Tweak anything that doesn&apos;t fit.
               </p>
             </div>

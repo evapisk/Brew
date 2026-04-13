@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { MatchStrengthBadge } from "@/components/MatchStrengthBadge";
 import { getMatchStrength } from "@/lib/matching";
@@ -92,12 +93,12 @@ export default function MatchesPage() {
   return (
     <main className="flex min-h-screen flex-col bg-brew-offwhite">
       {/* ── Header ── */}
-      <div className="brew-header px-6 pt-14 pb-5 shrink-0">
+      <div className="relative brew-header px-6 pt-10 pb-5 shrink-0 overflow-hidden">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-rova text-white" style={{ letterSpacing: "-0.01em" }}>matches</h1>
-            <p className="text-xs font-lora text-white/50 mt-0.5">
-              {matches.length} connection{matches.length !== 1 ? "s" : ""}
+            <p className="text-xs font-playfair text-white/50 mt-0.5">
+              helping each other on campus
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -126,6 +127,9 @@ export default function MatchesPage() {
               + Discover
             </Link>
           </div>
+        </div>
+        <div className="absolute right-0 bottom-0 pointer-events-none">
+          <Image src="/coffee-landing.png" alt="" width={110} height={110} style={{ mixBlendMode: "screen" }} />
         </div>
       </div>
 

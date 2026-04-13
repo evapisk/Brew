@@ -8,10 +8,11 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        rova:    ["Rova", "system-ui", "sans-serif"],
-        lora:    ["Lora", "Georgia", "serif"],
-        raleway: ["Raleway", "system-ui", "sans-serif"],
-        sans:    ["Raleway", "system-ui", "sans-serif"],
+        rova:     ["Rova", "system-ui", "sans-serif"],
+        playfair: ["var(--font-playfair)", "Georgia", "serif"],
+        lora:     ["Lora", "Georgia", "serif"],
+        raleway:  ["Raleway", "system-ui", "sans-serif"],
+        sans:     ["Raleway", "system-ui", "sans-serif"],
       },
       colors: {
         brew: {
