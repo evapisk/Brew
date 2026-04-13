@@ -65,7 +65,9 @@ ${goalsDescription || "(not provided)"}`,
     const text = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
     const parsed = JSON.parse(text);
     return NextResponse.json(parsed);
-  } catch {
-    return NextResponse.json({ error: "AI import failed" }, { status: 500 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[onboard/import]", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
